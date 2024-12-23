@@ -1,9 +1,5 @@
-using System.Text.Json;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
-using IdentityModel.OidcClient;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,26 +7,27 @@ builder.Services.AddSingleton<IEndpointManager, EndpointForge.WebApi.Managers.En
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
 
-var app = builder.Build();
+var application = builder.Build();
 
-app.MapDefaultEndpoints();
+application.MapDefaultEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (application.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    application.MapOpenApi();
 }
 
 
-app.UseHttpsRedirection();
+application.UseHttpsRedirection();
 
-app.MapPost(
-    "/add-endpoint",
-    async Task<Results<
-            Created<AddEndpointRequest>,
-            UnprocessableEntity<ErrorResponse>, 
-            Conflict<ErrorResponse>,
-            BadRequest<ErrorResponse>>> 
-        (IEndpointManager endpointManager, HttpRequest httpRequest)
-        => await endpointManager.TryAddEndpointAsync(httpRequest));
+application.MapPost(
+        "/add-endpoint",
+        async (IEndpointManager endpointManager, HttpRequest httpRequest)
+            => await endpointManager.TryAddEndpointAsync(httpRequest))
+    .Accepts<AddEndpointRequest>(contentType: "application/json")
+    .Produces<AddEndpointRequest>(StatusCodes.Status201Created)
+    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+    .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
+    .Produces<ErrorResponse>(StatusCodes.Status422UnprocessableEntity);
 
-app.Run();
+
+application.Run();

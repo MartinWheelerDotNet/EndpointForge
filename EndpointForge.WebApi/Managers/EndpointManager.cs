@@ -1,9 +1,7 @@
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EndpointForge.WebApi.Managers;
 
@@ -17,11 +15,7 @@ public class EndpointManager : IEndpointManager
     
     private readonly ConcurrentDictionary<AddEndpointRequest, bool> _endpointDetails = new();
     
-    public async Task<Results<
-        Created<AddEndpointRequest>,
-        UnprocessableEntity<ErrorResponse>, 
-        Conflict<ErrorResponse>, 
-        BadRequest<ErrorResponse>>> 
+    public async Task<IResult>  
         TryAddEndpointAsync(HttpRequest httpRequest)
     {
         AddEndpointRequest? addEndpointRequest;
