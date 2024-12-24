@@ -29,5 +29,4 @@ application.MapPost(
     .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
     .Produces<ErrorResponse>(StatusCodes.Status422UnprocessableEntity);
 
-
 application.Run();
