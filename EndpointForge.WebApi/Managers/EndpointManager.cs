@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
@@ -32,17 +33,29 @@ public class EndpointManager : IEndpointManager
         {
             return TypedResults.BadRequest(new ErrorResponse(null, null, EmptyRequestBodyMessage));
         }
-        
         if (addEndpointRequest is null)
             return TypedResults.BadRequest(new ErrorResponse(null, null, EmptyRequestBodyMessage));
-        if (string.IsNullOrEmpty(addEndpointRequest.Uri))
-            return TypedResults.UnprocessableEntity(new ErrorResponse(null, null, UriMissingMessage));
-        if (string.IsNullOrEmpty(addEndpointRequest.HttpMethod.Method))
-            return TypedResults.UnprocessableEntity(new ErrorResponse(null, null, HttpMethodMissingMessage));
+        
+        if (!TryValidateAddEndpointRequest(addEndpointRequest, out var errorResult))
+            return errorResult;
         
         return _endpointDetails.TryAdd(addEndpointRequest, true)
             ? TypedResults.Created(addEndpointRequest.Uri, addEndpointRequest)
             : TypedResults.Conflict(
                 new ErrorResponse(addEndpointRequest.Uri, addEndpointRequest.HttpMethod, ConflictMessage));
+    }
+
+    private static bool TryValidateAddEndpointRequest(
+        AddEndpointRequest addEndpointRequest, 
+        [NotNullWhen(false)] out IResult? errorResult)
+    {
+        errorResult = null;
+        
+        if (string.IsNullOrEmpty(addEndpointRequest.Uri))
+            errorResult = TypedResults.UnprocessableEntity(new ErrorResponse(null, null, UriMissingMessage));
+        else if (string.IsNullOrEmpty(addEndpointRequest.HttpMethod.Method))
+            errorResult = TypedResults.UnprocessableEntity(new ErrorResponse(null, null, HttpMethodMissingMessage));
+
+        return errorResult is null;
     }
 }

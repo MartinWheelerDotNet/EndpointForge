@@ -6,7 +6,7 @@ namespace EndpointForge.IntegrationTests;
 public class WebApiTests : IDisposable
 {
     public readonly DistributedApplication Application;
-    
+
     public WebApiTests()
     { 
         var appHost = CreateDefaultAppHost().Result;
@@ -28,8 +28,8 @@ public class WebApiTests : IDisposable
         
         return appHost;
     }
-    
-    protected static async Task WaitForRunningState(
+
+    private static async Task WaitForRunningState(
         DistributedApplication application,
         string serviceName,
         TimeSpan? timeout = null) 

@@ -5,16 +5,16 @@ namespace EndpointForge.IntegrationTests.EndpointTests;
 
 public class AddEndpointTests(WebApiTests webApiTests) : IClassFixture<WebApiTests>
 {
-    private const string ResourceName = "webapi";
-    private const string EndpointName = "add-endpoint";
+    private const string WebApiName = "webapi";
+    private const string AddEndpointName = "add-endpoint";
 
     [Fact]
     public async Task CallingAddEndpointWithoutEndpointDetailsReturnsBadRequest()
     {
         ErrorResponse expectedResponseBody = new(null, null, "Request body must not be empty.");
-        using var httpClient = webApiTests.Application.CreateHttpClient(ResourceName);
+        using var httpClient = webApiTests.Application.CreateHttpClient(WebApiName);
 
-        var response = await httpClient.PostAsync($"/{EndpointName}", null);
+        var response = await httpClient.PostAsync($"/{AddEndpointName}", null);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -27,9 +27,9 @@ public class AddEndpointTests(WebApiTests webApiTests) : IClassFixture<WebApiTes
     {
         AddEndpointRequest addEndpointRequest = new(string.Empty, HttpMethod.Get);
         ErrorResponse expectedResponseBody = new(null, null, "Provided URI is missing.");
-        using var httpClient = webApiTests.Application.CreateHttpClient(ResourceName);
+        using var httpClient = webApiTests.Application.CreateHttpClient(WebApiName);
         
-        var response = await httpClient.PostAsJsonAsync($"{EndpointName}", addEndpointRequest);
+        var response = await httpClient.PostAsJsonAsync($"{AddEndpointName}", addEndpointRequest);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -41,9 +41,9 @@ public class AddEndpointTests(WebApiTests webApiTests) : IClassFixture<WebApiTes
     public async Task CallingAddEndpointWithWithValidEndpointDetailsReturnsCreated()
     {
         AddEndpointRequest addEndpointRequest = new("/test-endpoint-created", HttpMethod.Get);
-        using var httpClient = webApiTests.Application.CreateHttpClient(ResourceName);
+        using var httpClient = webApiTests.Application.CreateHttpClient(WebApiName);
         
-        var response = await httpClient.PostAsJsonAsync($"{EndpointName}", addEndpointRequest);
+        var response = await httpClient.PostAsJsonAsync($"{AddEndpointName}", addEndpointRequest);
         var responseBody = await response.Content.ReadFromJsonAsync<AddEndpointRequest>();
 
         Assert.Multiple(
@@ -58,10 +58,10 @@ public class AddEndpointTests(WebApiTests webApiTests) : IClassFixture<WebApiTes
         AddEndpointRequest addGetEndpointRequest = new("/test-endpoint-conflict", HttpMethod.Get);
         AddEndpointRequest addPostEndpointRequest = new("/test-endpoint-conflict", HttpMethod.Post);
         
-        using var httpClient = webApiTests.Application.CreateHttpClient(ResourceName);
-        await httpClient.PostAsJsonAsync($"{EndpointName}", addGetEndpointRequest);
+        using var httpClient = webApiTests.Application.CreateHttpClient(WebApiName);
+        await httpClient.PostAsJsonAsync($"{AddEndpointName}", addGetEndpointRequest);
         
-        var response = await httpClient.PostAsJsonAsync($"{EndpointName}", addPostEndpointRequest);
+        var response = await httpClient.PostAsJsonAsync($"{AddEndpointName}", addPostEndpointRequest);
         var responseBody = await response.Content.ReadFromJsonAsync<AddEndpointRequest>();
 
         Assert.Multiple(
@@ -78,10 +78,10 @@ public class AddEndpointTests(WebApiTests webApiTests) : IClassFixture<WebApiTes
             "/test-endpoint-conflict",
             HttpMethod.Get,
             "The requested endpoint has already been added.");
-        using var httpClient = webApiTests.Application.CreateHttpClient(ResourceName);
-        await httpClient.PostAsJsonAsync($"{EndpointName}", addEndpointRequest);
+        using var httpClient = webApiTests.Application.CreateHttpClient(WebApiName);
+        await httpClient.PostAsJsonAsync($"{AddEndpointName}", addEndpointRequest);
         
-        var response = await httpClient.PostAsJsonAsync($"{EndpointName}", addEndpointRequest);
+        var response = await httpClient.PostAsJsonAsync($"{AddEndpointName}", addEndpointRequest);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
