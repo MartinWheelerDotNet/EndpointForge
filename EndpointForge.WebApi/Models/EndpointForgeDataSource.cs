@@ -7,14 +7,23 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
-        var (pattern, _, priority) = addEndpointRequest;
-        var endpoint = new RouteEndpointBuilder(BuildResponse, RoutePatternFactory.Parse(pattern), priority)
+        var (pattern, method, response, priority) = addEndpointRequest;
+        //var response = addEndpointRequest.Response ?? new EndpointRequestResponse(200);
+        var endpoint = new RouteEndpointBuilder(
+                BuildResponse(response ?? new EndpointRequestResponse(200)), 
+                RoutePatternFactory.Parse(pattern), 
+                priority)
             {
-                Metadata = { new HttpMethodMetadata([addEndpointRequest.Method]) }
+                Metadata = { new HttpMethodMetadata([method]) }
             }
             .Build();
         base.AddEndpoint(endpoint, apply);
     }
 
-    private static RequestDelegate BuildResponse => async _ => await Task.FromResult(TypedResults.Ok());
+    private static RequestDelegate BuildResponse(EndpointRequestResponse response)
+        => async context =>
+        {
+            context.Response.StatusCode = response.StatusCode;
+            await Task.CompletedTask; // Simulate async operation for now
+        };
 }
