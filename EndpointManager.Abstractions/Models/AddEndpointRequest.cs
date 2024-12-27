@@ -1,3 +1,4 @@
 namespace EndpointManager.Abstractions.Models;
 
-public record AddEndpointRequest(string Uri, HttpMethod HttpMethod);
+[Serializable]
+public record AddEndpointRequest(string Route, string Method, int Priority = 0);

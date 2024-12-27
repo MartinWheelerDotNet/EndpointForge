@@ -1,19 +1,22 @@
+using EndpointForge.IntegrationTests.Fixtures;
+using FluentAssertions;
+
 namespace EndpointForge.IntegrationTests;
 
-public class ServiceStatusTests(WebApiTests webApiTests) : IClassFixture<WebApiTests>
+public class ServiceStatusTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
 {
     [Theory]
     [InlineData("webapi")]
     public async Task ResourceHealthEndpointReturnsHealthyWhenResourceIsRunning(string resourceName)
     {
         const string endpointName = "/health";
-        using var httpClient = webApiTests.Application.CreateHttpClient(resourceName);
+        using var httpClient = webApiFixture.Application.CreateHttpClient(resourceName);
         
         var response = await httpClient.GetAsync(endpointName);
         var body = await response.Content.ReadAsStringAsync();
         
         Assert.Multiple(
-            () => Assert.Equal(HttpStatusCode.OK, response.StatusCode),
-            () => Assert.Equal("Healthy", body));
+            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
+            () => body.Should().Be("Healthy"));
     }
 }

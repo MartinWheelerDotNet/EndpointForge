@@ -1,27 +1,27 @@
+using EndpointForge.WebApi.Extensions;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSingleton<IEndpointManager, EndpointForge.WebApi.Managers.EndpointManager>();
+builder.Services.AddEndpointForge();
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
 
 var application = builder.Build();
 
 application.MapDefaultEndpoints();
+application.UseEndpointForge();
 
 if (application.Environment.IsDevelopment())
 {
     application.MapOpenApi();
 }
 
-
 application.UseHttpsRedirection();
 
 application.MapPost(
         "/add-endpoint",
-        async (IEndpointManager endpointManager, HttpRequest httpRequest)
+        async (IEndpointForgeManager endpointManager, HttpRequest httpRequest)
             => await endpointManager.TryAddEndpointAsync(httpRequest))
     .Accepts<AddEndpointRequest>(contentType: "application/json")
     .Produces<AddEndpointRequest>(StatusCodes.Status201Created)

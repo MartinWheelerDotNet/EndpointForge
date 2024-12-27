@@ -1,13 +1,13 @@
 using Aspire.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace EndpointForge.IntegrationTests;
+namespace EndpointForge.IntegrationTests.Fixtures;
 
-public class WebApiTests : IDisposable
+public class WebApiFixture : IDisposable
 {
     public readonly DistributedApplication Application;
 
-    public WebApiTests()
+    public WebApiFixture()
     { 
         var appHost = CreateDefaultAppHost().Result;
         Application = appHost.BuildAsync().Result;
