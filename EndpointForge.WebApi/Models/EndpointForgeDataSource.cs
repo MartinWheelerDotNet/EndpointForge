@@ -1,3 +1,4 @@
+using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
 using Microsoft.AspNetCore.Routing.Patterns;
 
@@ -7,23 +8,21 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
-        var (pattern, method, response, priority) = addEndpointRequest;
-        //var response = addEndpointRequest.Response ?? new EndpointRequestResponse(200);
         var endpoint = new RouteEndpointBuilder(
-                BuildResponse(response ?? new EndpointRequestResponse(200)), 
-                RoutePatternFactory.Parse(pattern), 
-                priority)
+                BuildResponse(addEndpointRequest.Response ?? new EndpointResponseDetails(200)), 
+                RoutePatternFactory.Parse(addEndpointRequest.Route), 
+                addEndpointRequest.Priority)
             {
-                Metadata = { new HttpMethodMetadata([method]) }
+                Metadata = { new HttpMethodMetadata(addEndpointRequest.Methods) }
             }
             .Build();
         base.AddEndpoint(endpoint, apply);
     }
 
-    private static RequestDelegate BuildResponse(EndpointRequestResponse response)
+    private static RequestDelegate BuildResponse(EndpointResponseDetails responseDetails)
         => async context =>
         {
-            context.Response.StatusCode = response.StatusCode;
+            context.Response.StatusCode = responseDetails.StatusCode;
             await Task.CompletedTask; // Simulate async operation for now
         };
 }

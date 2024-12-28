@@ -40,6 +40,7 @@ public class WebApiFixture : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         Application.Dispose();
     }
 }

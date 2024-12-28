@@ -30,7 +30,7 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
         }
     }
 
-    protected void RefreshEndpoints()
+    private void RefreshEndpoints()
     {
         lock (_tokenLock)
         {
