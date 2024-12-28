@@ -26,10 +26,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
 
     [Fact]
-    public async Task CallingAddEndpointWithEmptyRouteRespondsWithUnprocessableEntity()
+    public async Task CallingAddEndpointWithoutRouteRespondsWithUnprocessableEntity()
     {
-        var addEndpointRequest = new { Method = "GET" };
-        ErrorResponse expectedResponseBody = new(["Endpoint Request `route` is missing or empty."]);
+        var addEndpointRequest = new { Methods = new[] { "GET" } };
+        ErrorResponse expectedResponseBody = new(["Request body is invalid."]);
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         
         var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
@@ -41,28 +41,28 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
     
     [Fact]
-    public async Task CallingAddEndpointWithEmptyHttpMethodRespondsWithUnprocessableEntity()
+    public async Task CallingAddEndpointWithoutMethodsRespondsWithUnprocessableEntity()
     {
         var addEndpointRequest = new { Route = "/test-unprocessable-entity" };
-        ErrorResponse expectedResponseBody = new(["Endpoint request `method` is missing or empty."]);
+        ErrorResponse expectedResponseBody = new(["Request body is invalid."]);
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         
         var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-
+        
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
     
     [Fact]
-    public async Task CallingAddEndpointWithMultipleMissingElementsRespondsWithUnprocessableEntityWithMultipleErrors()
+    public async Task CallingAddEndpointWithMultipleEmptyElementsRespondsWithUnprocessableEntityWithMultipleErrors()
     {
-        var addEndpointRequest = new { Priority = 0 };
+        var addEndpointRequest = new { Route = string.Empty, Priority = 0, Methods = Array.Empty<string>() };
         ErrorResponse expectedResponseBody = new(
             [
-                "Endpoint Request `route` is missing or empty.",
-                "Endpoint request `method` is missing or empty."
+                "Endpoint request `route` is empty or whitespace.",
+                "Endpoint request `methods` contains no entries."
             ]);
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         
@@ -79,8 +79,12 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     [Fact]
     public async Task CallingAddEndpointWithDuplicateDetailsRespondsWithConflict()
     {
-        var addEndpointRequest = new { Route = "/test-endpoint-conflict", Method = "GET" };
-        ErrorResponse expectedResponseBody = new(["The requested endpoint has already been added."]);
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-conflict", 
+            Methods = new[] { "GET" }
+        };
+        ErrorResponse expectedResponseBody = new(["The requested endpoint has already been added for GET method."]);
         
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
@@ -98,7 +102,13 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     [Fact]
     public async Task CallingAddEndpointWithWithValidEndpointDetailsRespondsWithCreated()
     {
-        var addEndpointRequest = new { Route = "/test-endpoint-created", Method = "GET", Priority = 0, Response = new { StatusCode = 200 } };
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-created", 
+            Methods = new[] { "GET" }, 
+            Priority = 0, 
+            Response = new { StatusCode = 200 }
+        };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         
         var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
@@ -109,29 +119,17 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             () => response.Headers.Location.Should().Be(addEndpointRequest.Route),
             () => responseBody.Should().BeEquivalentTo(addEndpointRequest));
     }
-    
-    [Fact]
-    public async Task ProvidingOnlyOneMethodCreatesEndpointOnlyOnProvidedMethod()
-    {
-        var addEndpointRequest = new { Route = "/test-endpoint-method-not-found", Method = "GET", Priority = 0 };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-        
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
-    
-        var response = await httpClient.PostAsync(addEndpointRequest.Route, null);
-
-        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
-    }
     #endregion
     
     #region Response StatusCode Tests
+    
     [Fact]
     public async Task ProvidingResponseStatusCode400RespondsWithBadRequest() 
     {
         var addEndpointRequest = new
         {
             Route = "/test-endpoint-response-status-code-400",
-            Method = "GET", 
+            Methods = new[] { "GET" }, 
             Priority = 0,
             Response = new
             {
@@ -153,7 +151,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var addEndpointRequest = new
         {
             Route = "/test-endpoint-response-status-code-201",
-            Method = "GET", 
+            Methods = new[] { "GET" }, 
             Priority = 0,
             Response = new
             {
@@ -174,8 +172,8 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     {
         var addEndpointRequest = new
         {
-            Route = "/test-endpoint-no-response",
-            Method = "GET", 
+            Route = "/test-endpoint-no-endpoint-response",
+            Methods = new[] { "GET" }, 
             Priority = 0
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -188,32 +186,46 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
     #endregion
     
-    // #region Priority Tests
-    // [Fact]
-    // public async Task CallingAddEndpointTwiceWithDifferentPrioritiesRespondsWithHighestPriorityEndpoint()
-    // {
-    //     const string route = "/test-endpoint-created-priority";
-    //     var lowerPriorityRequest = new
-    //     {
-    //         Route = route,
-    //         Method = "GET",
-    //         Priority = 0,
-    //         Response = new { StatusCode = 200 }
-    //     };
-    //     var higherPriorityRequest = lowerPriorityRequest with
-    //     {
-    //         Priority = -1,
-    //         Response = new { StatusCode = 400 }
-    //     };
-    //     
-    //     using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-    //     
-    //     await httpClient.PostAsJsonAsync(AddEndpointRoute, lowerPriorityRequest);
-    //     await httpClient.PostAsJsonAsync(AddEndpointRoute, higherPriorityRequest);
-    //
-    //     var response = await httpClient.GetAsync(route);
-    //
-    //     response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    // }
-    // #endregion
+    #region Response Method Tests
+
+    [Fact]
+    public async Task ProvidingOnlyOneMethodCreatesEndpointOnlyOnProvidedMethod()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-method-not-found", 
+            Methods = new[] { "GET" },
+            Priority = 0
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+    
+        var response = await httpClient.PostAsync(addEndpointRequest.Route, null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+    }
+    
+    [Fact]
+    public async Task ProvidingMultipleMethodsCreatesEndpointsForThoseMethods()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-multiple-methods",
+            Methods = new[] { "GET", "POST" }, 
+            Priority = 0
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+    
+        var getResponse = await httpClient.GetAsync(addEndpointRequest.Route);
+        var postResponse = await httpClient.PostAsync(addEndpointRequest.Route, null);
+
+        Assert.Multiple(
+            () => getResponse.StatusCode.Should().Be(HttpStatusCode.OK), 
+            () => postResponse.StatusCode.Should().Be(HttpStatusCode.OK));
+    }
+    
+    #endregion
 }

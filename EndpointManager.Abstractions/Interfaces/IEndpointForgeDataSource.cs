@@ -1,6 +1,6 @@
 using EndpointManager.Abstractions.Models;
 
-namespace EndpointForge.WebApi.Models;
+namespace EndpointManager.Abstractions.Interfaces;
 
 public interface IEndpointForgeDataSource
 {
