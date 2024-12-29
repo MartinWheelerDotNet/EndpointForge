@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using EndpointForge.WebApi.Deserializers;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace EndpointForge.WebApi.Managers;
 

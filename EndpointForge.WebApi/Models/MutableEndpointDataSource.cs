@@ -17,8 +17,7 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
         _cancellationTokenSource = new CancellationTokenSource();
         _changeToken = new CancellationChangeToken(_cancellationTokenSource.Token);
     }
-
-    public override IChangeToken GetChangeToken() => _changeToken;
+    
     public override IReadOnlyList<Endpoint> Endpoints
     {
         get
@@ -29,6 +28,8 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
             }
         }
     }
+    
+    public override IChangeToken GetChangeToken() => _changeToken;
 
     private void RefreshEndpoints()
     {

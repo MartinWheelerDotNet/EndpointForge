@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using EndpointManager.Abstractions.Extensions;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
 using Microsoft.AspNetCore.Routing.Patterns;
@@ -9,7 +11,7 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
         var endpoint = new RouteEndpointBuilder(
-                BuildResponse(addEndpointRequest.Response ?? new EndpointResponseDetails(200)), 
+                BuildResponse(addEndpointRequest.Response), 
                 RoutePatternFactory.Parse(addEndpointRequest.Route), 
                 addEndpointRequest.Priority)
             {
@@ -23,6 +25,19 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
         => async context =>
         {
             context.Response.StatusCode = responseDetails.StatusCode;
-            await Task.CompletedTask; // Simulate async operation for now
+            context.Response.ContentType = GetContentType(responseDetails);
+
+            if (!string.IsNullOrWhiteSpace(responseDetails.Body))
+            {
+                await context.Response.WriteAsync(responseDetails.Body!);
+            }
+        };
+    
+    private static string? GetContentType(EndpointResponseDetails responseDetails)
+        => (responseDetails.HasBody(), responseDetails.HasContentType()) switch 
+        {
+            (false, _) => null,
+            (true, false) => MediaTypeNames.Text.Plain,
+            (true, true) => responseDetails.ContentType
         };
 }
