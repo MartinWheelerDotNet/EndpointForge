@@ -1,46 +1,65 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using EndpointForge.WebApi.Deserializers;
+using EndpointForge.WebApi.Extensions;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Managers;
 
-public class EndpointForgeManager(IEndpointForgeDataSource endpointForge) : IEndpointForgeManager
+public class EndpointForgeManager(
+    IEndpointForgeDataSource endpointForge, ILogger<EndpointForgeManager> logger) : IEndpointForgeManager
 {
-    private const string ConflictMessage = "The requested endpoint has already been added for {0} method.";
-    private const string RouteMissingOrEmptyMessage = "Endpoint request `route` is empty or whitespace.";
-    private const string MethodMissingOrEmptyMessage = "Endpoint request `methods` contains no entries.";
-    private const string EmptyRequestBodyMessage = "Request body must not be empty.";
+    private const string ConflictMessage = "The requested endpoint has already been added for {0} method";
+    private const string RouteMissingOrEmptyMessage = "Endpoint request `route` is empty or whitespace";
+    private const string MethodMissingOrEmptyMessage = "Endpoint request `methods` contains no entries";
+    private const string EmptyRequestBodyMessage = "Request body must not be empty";
     
     private readonly ConcurrentDictionary<EndpointRoutingDetails, EndpointResponseDetails> _endpointDetails = new();
     private readonly Lock _dictionaryLock = new();
     
     public async Task<IResult> TryAddEndpointAsync(HttpRequest httpRequest)
     {
-        var (addEndpointRequest, deserializedErrorResponse) = 
+        logger.LogInformation("Add endpoint request received.");
+        var (addEndpointRequest, errorResponse) = 
             await RequestDeserializer.TryDeserializeRequestAsync<AddEndpointRequest>(httpRequest);
-        
-        if (deserializedErrorResponse is not null)
-            return deserializedErrorResponse;
 
-        if (!TryValidateEndpointRequest(addEndpointRequest, out var validationErrorResponse))
-            return TypedResults.UnprocessableEntity(validationErrorResponse);
+        if (errorResponse is not null)
+        {
+            logger.LogErrorResponse(errorResponse);
+            return errorResponse.GetTypedResult();
+        }
         
+        logger.LogInformation("Deserialized AddEndpointRequest.");
+        
+        if (!TryValidateEndpointRequest(addEndpointRequest, out var validationErrorResponse))
+        {
+            logger.LogErrorResponse(validationErrorResponse);
+            return TypedResults.UnprocessableEntity(validationErrorResponse); 
+        }
+        
+        logger.LogInformation("Successfully validated the add endpoint request.");
+
         if (!TryCreateEndpoint(addEndpointRequest, out var conflictErrorResponse))
-            return TypedResults.Conflict(conflictErrorResponse);
+        {
+            logger.LogErrorResponse(conflictErrorResponse);
+            return conflictErrorResponse.GetTypedResult();
+        }
+        
+        logger.LogAddEndpointRequestCompleted(addEndpointRequest);
         
         return TypedResults.Created(addEndpointRequest.Route, addEndpointRequest);
     }
 
     private static bool TryValidateEndpointRequest(
         [NotNullWhen(true)] AddEndpointRequest? addEndpointRequest, 
-        out ErrorResponse? errorResponse)
+        [NotNullWhen(false)] out ErrorResponse? errorResponse)
     {
         errorResponse = null;
         if (addEndpointRequest is null)
         {
-            errorResponse = new ErrorResponse([EmptyRequestBodyMessage]);
+            errorResponse = new ErrorResponse(HttpStatusCode.UnprocessableEntity, [EmptyRequestBodyMessage]);
             return false;
         }
 
@@ -54,7 +73,7 @@ public class EndpointForgeManager(IEndpointForgeDataSource endpointForge) : IEnd
         if (errors.Count is 0)
             return true;
         
-        errorResponse = new ErrorResponse(errors);
+        errorResponse = new ErrorResponse(HttpStatusCode.UnprocessableEntity, errors);
         return false;
     }
 
@@ -78,7 +97,7 @@ public class EndpointForgeManager(IEndpointForgeDataSource endpointForge) : IEnd
 
             if (errors.Count is not 0)
             {
-                errorResponse = new ErrorResponse(errors);
+                errorResponse = new ErrorResponse(HttpStatusCode.Conflict, errors);
                 return false;
             }
 

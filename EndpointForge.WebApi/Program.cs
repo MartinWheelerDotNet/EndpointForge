@@ -1,8 +1,16 @@
+using System.Text.Json.Serialization;
 using EndpointForge.WebApi.Extensions;
 using EndpointManager.Abstractions.Interfaces;
 using EndpointManager.Abstractions.Models;
+using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
+
 builder.Services.AddEndpointForge();
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
