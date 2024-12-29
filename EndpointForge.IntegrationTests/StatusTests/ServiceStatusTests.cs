@@ -1,7 +1,7 @@
 using EndpointForge.IntegrationTests.Fixtures;
 using FluentAssertions;
 
-namespace EndpointForge.IntegrationTests;
+namespace EndpointForge.IntegrationTests.StatusTests;
 
 public class ServiceStatusTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
 {

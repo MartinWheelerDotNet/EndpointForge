@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 
 namespace EndpointForge.IntegrationTests.Fixtures;
 
+// WebApiFixture is used as a class fixture via DI and is not directly instantiated.
+// ReSharper disable once ClassNeverInstantiated.Global
 public class WebApiFixture : IDisposable
 {
     public readonly DistributedApplication Application;

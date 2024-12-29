@@ -228,4 +228,89 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
     
     #endregion
+    
+    #region Response Body Tests
+
+    [Fact]
+    public async Task ProvidingNoBodyProvidesNoContentTypeHeaderAndNoBody()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-response-no-body",
+            Methods = new[] { "GET" },
+            Priority = 0,
+            Response = new
+            {
+                StatusCode = 200
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        Assert.Multiple(
+            () => response.Content.Headers.ContentType.Should().BeNull(),
+            () => responseBody.Should().BeEmpty(),
+            () => response.Content.Headers.ContentLength.Should().Be(0));
+    }
+    
+    [Fact]
+    public async Task ProvidingBodyWithNoContentTypeProvidesContentTypeHeaderAsPlainTextWithBody()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-response-body-no-content-type",
+            Methods = new[] { "GET" },
+            Priority = 0,
+            Response = new
+            {
+                StatusCode = 201,
+                Body = "String response body."
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        Assert.Multiple(
+            () => response.Content.Headers.ContentType!.MediaType.Should().Be("text/plain"),
+            () => response.Content.Headers.ContentLength.Should().Be(21),
+            () => responseBody.Should().Be("String response body."));
+    }
+    
+    [Fact]
+    public async Task ProvidingResponseBodyAndTestTypeContentTypeProvidesContentTypeHeaderAsTestTextWithBody()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-response-body-with-content-type",
+            Methods = new[] { "GET" },
+            Priority = 0,
+            Response = new
+            {
+                StatusCode = 201,
+                ContentType = "text/test-type",
+                Body = "String response body."
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        Assert.Multiple(
+            () => response.Content.Headers.ContentType!.MediaType.Should().Be("text/test-type"),
+            () => response.Content.Headers.ContentLength.Should().Be(21),
+            () => responseBody.Should().Be("String response body."));
+    }
+    
+    #endregion
 }
