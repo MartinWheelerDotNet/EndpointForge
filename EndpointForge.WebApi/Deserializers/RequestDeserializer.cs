@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using EndpointForge.WebApi.Models;
 using EndpointManager.Abstractions.Models;
@@ -14,21 +15,17 @@ public static class RequestDeserializer
         try
         {
             var addEndpointRequest = await request.ReadFromJsonAsync<T>();
-            return new DeserializeResult<T>(addEndpointRequest);
+            return new DeserializeResult<T>(Result: addEndpointRequest);
         }
         catch (JsonException)
         {
-            return new DeserializeResult<T>
-            {
-                ErrorResult = TypedResults.UnprocessableEntity(new ErrorResponse([InvalidRequestBodyMessage]))
-            };
+            return new DeserializeResult<T>(
+                ErrorResponse: new ErrorResponse(HttpStatusCode.UnprocessableEntity, [InvalidRequestBodyMessage]));
         }
         catch
         {
-            return new DeserializeResult<T>
-            {
-                ErrorResult = TypedResults.BadRequest(new ErrorResponse([EmptyRequestBodyMessage]))
-            };
+            return new DeserializeResult<T>(
+                ErrorResponse: new ErrorResponse(HttpStatusCode.BadRequest, [EmptyRequestBodyMessage]));
         }
     }
 }
