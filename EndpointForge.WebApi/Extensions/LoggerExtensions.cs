@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Extensions;
 
+[ExcludeFromCodeCoverage]
 internal static partial class LoggerExtensions
 {
     #region Error Response
@@ -39,7 +41,7 @@ internal static partial class LoggerExtensions
 
     public static void LogAddEndpointRequestCompleted(this ILogger logger, AddEndpointRequest addEndpointRequest)
     {
-        foreach (var details in addEndpointRequest.EndpointRoutingDetails)
+        foreach (var details in addEndpointRequest.GetEndpointRoutingDetails())
         {
             logger.EndpointRoutingDetails(details); 
         }

@@ -1,4 +1,4 @@
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Models;
 

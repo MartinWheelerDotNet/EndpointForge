@@ -1,10 +1,11 @@
 using System.Net.Mime;
-using EndpointManager.Abstractions.Extensions;
-using EndpointManager.Abstractions.Interfaces;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Extensions;
+using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions.Models;
 using Microsoft.AspNetCore.Routing.Patterns;
+using static System.Text.Encoding;
 
-namespace EndpointForge.WebApi.Models;
+namespace EndpointForge.WebApi.DataSources;
 
 public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForgeDataSource
 {
@@ -29,7 +30,8 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
 
             if (!string.IsNullOrWhiteSpace(responseDetails.Body))
             {
-                await context.Response.WriteAsync(responseDetails.Body!);
+                context.Response.ContentLength = UTF8.GetByteCount(responseDetails.Body!);
+                await context.Response.WriteAsync(responseDetails.Body);
             }
         };
     

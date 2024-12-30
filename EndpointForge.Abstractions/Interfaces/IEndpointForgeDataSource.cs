@@ -1,6 +1,6 @@
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 
-namespace EndpointManager.Abstractions.Interfaces;
+namespace EndpointForge.Abstractions.Interfaces;
 
 public interface IEndpointForgeDataSource
 {

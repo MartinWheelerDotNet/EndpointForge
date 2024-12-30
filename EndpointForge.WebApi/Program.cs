@@ -1,40 +1,70 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using EndpointForge.WebApi.Extensions;
-using EndpointManager.Abstractions.Interfaces;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions.Models;
 using Microsoft.AspNetCore.Http.Json;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace EndpointForge.WebApi;
 
-builder.Services.Configure<JsonOptions>(options =>
+[ExcludeFromCodeCoverage]
+internal class Program
 {
-    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-});
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        
+        ConfigureDefaultServices(builder);
+        
+        var application = builder.Build();
 
-builder.Services.AddEndpointForge();
-builder.Services.AddOpenApi();
-builder.AddServiceDefaults();
+        application.MapDefaultEndpoints();
+        application.UseEndpointForge();
 
-var application = builder.Build();
+        if (application.Environment.IsDevelopment()) 
+            application.MapOpenApi();
+        
+        application.UseHttpsRedirection();
 
-application.MapDefaultEndpoints();
-application.UseEndpointForge();
+        application.MapPost(
+            "/add-endpoint",
+            async (ILogger<Program> logger, IEndpointForgeManager endpointManager, HttpRequest httpRequest)
+                => await AddEndpoint(logger, httpRequest, endpointManager))
+            .Accepts<AddEndpointRequest>(contentType: "application/json")
+            .Produces<AddEndpointRequest>(StatusCodes.Status201Created)
+            .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
+            .Produces<ErrorResponse>(StatusCodes.Status422UnprocessableEntity);
 
-if (application.Environment.IsDevelopment())
-{
-    application.MapOpenApi();
+        application.Run();
+    }
+
+    #region Endpoint Methods
+    private static async Task<IResult> AddEndpoint(ILogger<Program> logger, HttpRequest httpRequest, IEndpointForgeManager endpointManager)
+    {
+        logger.LogInformation("Add endpoint request received.");
+        var (addEndpointRequest, errorResponse) = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
+
+        if (errorResponse is null)
+        {
+            logger.LogInformation("Deserialized AddEndpointRequest.");
+            return await endpointManager.TryAddEndpointAsync(addEndpointRequest!);
+        } 
+            
+        logger.LogErrorResponse(errorResponse);
+        return errorResponse.GetTypedResult();
+    }
+    #endregion
+
+    private static void ConfigureDefaultServices(WebApplicationBuilder builder)
+    {
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
+
+        builder.Services.AddEndpointForge();
+        builder.Services.AddOpenApi();
+        builder.AddServiceDefaults();
+    }
 }
-
-application.UseHttpsRedirection();
-
-application.MapPost(
-        "/add-endpoint",
-        async (IEndpointForgeManager endpointManager, HttpRequest httpRequest)
-            => await endpointManager.TryAddEndpointAsync(httpRequest))
-    .Accepts<AddEndpointRequest>(contentType: "application/json")
-    .Produces<AddEndpointRequest>(StatusCodes.Status201Created)
-    .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
-    .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
-    .Produces<ErrorResponse>(StatusCodes.Status422UnprocessableEntity);
-
-application.Run();

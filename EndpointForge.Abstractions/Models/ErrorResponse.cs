@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace EndpointManager.Abstractions.Models;
+namespace EndpointForge.Abstractions.Models;
 
 public record ErrorResponse(HttpStatusCode StatusCode, IEnumerable<string> Errors)
 { 

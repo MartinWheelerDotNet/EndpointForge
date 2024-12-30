@@ -13,7 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EndpointForge.ServiceDefaults\EndpointForge.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\EndpointManager.Abstractions\EndpointManager.Abstractions.csproj" />
+      <ProjectReference Include="..\EndpointForge.Abstractions\EndpointForge.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>
