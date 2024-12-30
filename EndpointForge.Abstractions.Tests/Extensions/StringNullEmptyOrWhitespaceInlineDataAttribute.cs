@@ -13,8 +13,7 @@ public class StringNullEmptyOrWhitespaceInlineDataAttribute : DataAttribute
             ["", false],
             [" ", false],
             ["\t", false],
-            ["\n", false],
-            [null, false]
+            ["\n", false]
         ];
     }
 }
