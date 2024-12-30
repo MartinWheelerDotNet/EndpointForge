@@ -30,9 +30,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - project: EndpointForge.WebApi.Tests
-          - project: EndpointForge.Abstractions.Tests
-          - project: EndpointForge.IntegrationTests
+          - name: WebApi
+            project: EndpointForge.WebApi.Tests/EndpointForge.WebApi.Tests.csproj
+          - name: Abstractions
+            project: EndpointForge.Abstractions.Tests/EndpointForge.Abstractions.Tests.csproj
+          - name: Integration
+            project: EndpointForge.IntegrationTests/EndpointForge.IntegrationTests.csproj
 
     steps:
       - uses: actions/checkout@v4
@@ -43,13 +46,14 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore ${{ matrix.project }}
 
       - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build  ${{ matrix.project }} --configuration Release --no-restore
 
       - name: Setup Dev Credentials
         run: dotnet dev-certs https --trust
-
+        if: ${{ matrix.name == 'Integration' }}
+          
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal "${{ matrix.project }}/${{ matrix.project }}.csproj"
+        run: dotnet test  ${{ matrix.project }} --configuration Release --no-build --verbosity normal
