@@ -31,7 +31,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EndpointForge.AppHost\EndpointForge.AppHost.csproj" />
-      <ProjectReference Include="..\EndpointManager.Abstractions\EndpointManager.Abstractions.csproj" />
+      <ProjectReference Include="..\EndpointForge.Abstractions\EndpointForge.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

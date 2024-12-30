@@ -1,5 +1,5 @@
 using System.Net;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Extensions;
 

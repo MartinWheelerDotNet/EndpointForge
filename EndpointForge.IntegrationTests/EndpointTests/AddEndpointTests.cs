@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using EndpointForge.IntegrationTests.Fixtures;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 using FluentAssertions;
 
 namespace EndpointForge.IntegrationTests.EndpointTests;

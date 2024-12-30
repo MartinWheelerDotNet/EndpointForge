@@ -1,4 +1,4 @@
-namespace EndpointManager.Abstractions.Models;
+namespace EndpointForge.Abstractions.Models;
 
 [Serializable]
 public record AddEndpointRequest
@@ -6,8 +6,8 @@ public record AddEndpointRequest
     public required string Route { get; init; }
     public required string[] Methods { get; init; } = [];
     public EndpointResponseDetails Response { get; init; } = new();
-    public int Priority { get; init; } = 0;
+    public int Priority { get; init; }
     
-    public IEnumerable<EndpointRoutingDetails> EndpointRoutingDetails => 
+    public IEnumerable<EndpointRoutingDetails> GetEndpointRoutingDetails() => 
         Methods.Select(method => new EndpointRoutingDetails(Route, method, Priority));
 }

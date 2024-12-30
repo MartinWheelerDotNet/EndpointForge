@@ -1,10 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using EndpointForge.WebApi.Deserializers;
 using EndpointForge.WebApi.Extensions;
-using EndpointManager.Abstractions.Interfaces;
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Managers;
 
@@ -19,20 +18,8 @@ public class EndpointForgeManager(
     private readonly ConcurrentDictionary<EndpointRoutingDetails, EndpointResponseDetails> _endpointDetails = new();
     private readonly Lock _dictionaryLock = new();
     
-    public async Task<IResult> TryAddEndpointAsync(HttpRequest httpRequest)
+    public async Task<IResult> TryAddEndpointAsync(AddEndpointRequest addEndpointRequest)
     {
-        logger.LogInformation("Add endpoint request received.");
-        var (addEndpointRequest, errorResponse) = 
-            await RequestDeserializer.TryDeserializeRequestAsync<AddEndpointRequest>(httpRequest);
-
-        if (errorResponse is not null)
-        {
-            logger.LogErrorResponse(errorResponse);
-            return errorResponse.GetTypedResult();
-        }
-        
-        logger.LogInformation("Deserialized AddEndpointRequest.");
-        
         if (!TryValidateEndpointRequest(addEndpointRequest, out var validationErrorResponse))
         {
             logger.LogErrorResponse(validationErrorResponse);
@@ -90,7 +77,7 @@ public class EndpointForgeManager(
         */
         lock (_dictionaryLock)
         {
-            var errors = addEndpointRequest.EndpointRoutingDetails
+            var errors = addEndpointRequest.GetEndpointRoutingDetails()
                 .Where(details => _endpointDetails.ContainsKey(details))
                 .Select(detail => string.Format(ConflictMessage, detail.Method))
                 .ToList();
@@ -101,7 +88,7 @@ public class EndpointForgeManager(
                 return false;
             }
 
-            foreach (var detail in addEndpointRequest.EndpointRoutingDetails)
+            foreach (var detail in addEndpointRequest.GetEndpointRoutingDetails())
                 _endpointDetails.TryAdd(detail, addEndpointRequest.Response);
 
             endpointForge.AddEndpoint(addEndpointRequest);

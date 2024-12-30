@@ -1,7 +1,8 @@
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Primitives;
 
-namespace EndpointForge.WebApi.Models;
+namespace EndpointForge.WebApi.DataSources;
 
 public abstract class MutableEndpointDataSource : EndpointDataSource
 {
@@ -29,6 +30,7 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
         }
     }
     
+    [ExcludeFromCodeCoverage]
     public override IChangeToken GetChangeToken() => _changeToken;
 
     private void RefreshEndpoints()

@@ -1,6 +1,6 @@
-using EndpointManager.Abstractions.Models;
+using EndpointForge.Abstractions.Models;
 
-namespace EndpointManager.Abstractions.Extensions;
+namespace EndpointForge.Abstractions.Extensions;
 
 public static class EndpointResponseDetailsExtensions
 {
