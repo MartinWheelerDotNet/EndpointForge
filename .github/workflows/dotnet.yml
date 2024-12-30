@@ -1,4 +1,4 @@
-name: Build and Test
+name: .NET Build and Test
 
 on:
   push:
@@ -8,25 +8,48 @@ on:
 
 jobs:
   build:
-
+    name: .NET Build
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --configuration Release --no-restore
+        
+  test:
+    name: .Net Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - project: EndpointForge.WebApi.Tests
+          - project: EndpointForge.Abstractions.Tests
+          - project: EndpointForge.IntegrationTests
 
     steps:
-    - uses: actions/checkout@v4
-      
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore
-      
-    - name: Setup Dev Credentials
-      run: dotnet dev-certs https --trust
-      
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Setup Dev Credentials
+        run: dotnet dev-certs https --trust
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal "${{ matrix.project }}/${{ matrix.project }}.csproj"
