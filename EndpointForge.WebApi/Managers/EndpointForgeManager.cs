@@ -54,7 +54,7 @@ public class EndpointForgeManager(
         
         if (string.IsNullOrWhiteSpace(addEndpointRequest.Route))
             errors.Add(RouteMissingOrEmptyMessage);
-        if (addEndpointRequest.Methods.Length == 0)
+        if (addEndpointRequest.Methods.Count == 0)
             errors.Add(MethodMissingOrEmptyMessage);
 
         if (errors.Count is 0)
