@@ -1,17 +1,42 @@
+using EndpointForge.Abstractions.Generators;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Managers;
-using EndpointForge.WebApi.Models;
 using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.WebApi.Factories;
+using EndpointForge.WebApi.Parsers;
+using EndpointForge.WebApi.Rules;
+using EndpointForge.WebApi.Writers;
+using Microsoft.IO;
 
 namespace EndpointForge.WebApi.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddEndpointForge(this IServiceCollection services)
-    {
-        services.AddSingleton<EndpointForgeDataSource>();
-        services.AddSingleton<IEndpointForgeDataSource>(
-            provider => provider.GetRequiredService<EndpointForgeDataSource>());
-        services.AddSingleton<IEndpointForgeManager, EndpointForgeManager>();
-    }
+    public static IServiceCollection AddEndpointForge(this IServiceCollection services)
+        => services
+            .AddCoreServices()
+            .AddGenerators()
+            .AddRuleWriters()
+            .AddGeneratorRules();
+
+    private static IServiceCollection AddCoreServices(this IServiceCollection services)
+        => services
+            .AddSingleton<EndpointForgeDataSource>()
+            .AddSingleton<RecyclableMemoryStreamManager>()
+            .AddSingleton<IEndpointForgeDataSource>(provider => provider.GetRequiredService<EndpointForgeDataSource>())
+            .AddSingleton<IEndpointForgeManager, EndpointForgeManager>()
+            .AddSingleton<IResponseBodyParser, ResponseBodyParser>()
+            .AddSingleton<IEndpointForgeRuleFactory, EndpointForgeRuleFactory>();
+
+    private static IServiceCollection AddGenerators(this IServiceCollection services) 
+        => services
+            .AddSingleton<IGuidGenerator, GuidGenerator>();
+    
+    private static IServiceCollection AddRuleWriters(this IServiceCollection services) 
+        => services
+            .AddSingleton<IGuidWriter, GuidWriter>();
+
+    private static IServiceCollection AddGeneratorRules(this IServiceCollection services)
+        => services
+            .AddSingleton<IEndpointForgeGeneratorRule, GenerateGuidRule>();
 }

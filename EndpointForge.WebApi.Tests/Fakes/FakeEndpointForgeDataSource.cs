@@ -5,7 +5,7 @@ using EndpointForge.Abstractions.Models;
 namespace EndpointForge.WebApi.Tests.Fakes;
 
 [ExcludeFromCodeCoverage]
-public class FakeEndpointForgeDataSource : IEndpointForgeDataSource
+internal class FakeEndpointForgeDataSource : IEndpointForgeDataSource
 {
     public List<AddEndpointRequest> AddedEndpoints { get; } = [];
 

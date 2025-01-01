@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Managers;
 using EndpointForge.WebApi.Tests.Fakes;
@@ -16,12 +15,13 @@ public class EndpointForgeManagerTests
 {
     private readonly FakeEndpointForgeDataSource _mockEndpointForgeDataSource;
     private readonly EndpointForgeManager _endpointForgeManager;
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     public EndpointForgeManagerTests()
     {
         var stubLogger = NullLogger<EndpointForgeManager>.Instance;
         _mockEndpointForgeDataSource = new FakeEndpointForgeDataSource();
-        _endpointForgeManager = new EndpointForgeManager(_mockEndpointForgeDataSource, stubLogger);
+        _endpointForgeManager = new EndpointForgeManager(stubLogger, _mockEndpointForgeDataSource);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class EndpointForgeManagerTests
             () => errorResponse.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () => errorResponse.Errors.Should().BeEquivalentTo("Endpoint request `route` is empty or whitespace"));
     }
-    
+
     [Fact]
     public async Task When_AddEndpointRequestHasEmptyMethod_Expect_UnprocessableEntityWithRouteEmptyMessage()
     {
@@ -107,7 +107,7 @@ public class EndpointForgeManagerTests
             () => errorResponse.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () => errorResponse.Errors.Should().BeEquivalentTo("Endpoint request `methods` contains no entries"));
     }
-    
+
     [Fact]
     public async Task When_AddEndpointRequestHasEmptyRouteAndEmptyMethod_Expect_UnprocessableEntityWithBothMessages()
     {
@@ -133,7 +133,7 @@ public class EndpointForgeManagerTests
                 "Endpoint request `route` is empty or whitespace",
                 "Endpoint request `methods` contains no entries"));
     }
-    
+
     [Fact]
     public async Task When_AddEndpointRequestHasConflictingRoutes_Expect_ConflictWithConflictMessage()
     {
@@ -148,7 +148,7 @@ public class EndpointForgeManagerTests
         };
         var httpContext = GetHttpContext();
         await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest);
-        
+
         var result = await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest);
         var errorResponse = await DeserializeErrorResponseFromResult(result, httpContext);
 
@@ -174,8 +174,7 @@ public class EndpointForgeManagerTests
         await result.ExecuteAsync(httpContext);
         httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(httpContext.Response.Body).ReadToEndAsync();
-        var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseBody, jsonSerializerOptions);
+        var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseBody, JsonSerializerOptions);
         return errorResponse!;
     }
 }

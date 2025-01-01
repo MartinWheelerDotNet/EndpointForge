@@ -1,13 +1,20 @@
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.DataSources;
+using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.IO;
 
 namespace EndpointForge.WebApi.Tests.DataSources;
 
 public class EndpointForgeDataSourceTests
 {
+    private readonly RecyclableMemoryStreamManager _memoryStreamManager = new();
+    private readonly ILogger<EndpointForgeDataSource> _stubLogger = new NullLogger<EndpointForgeDataSource>();
+    
     [Fact]
     public void When_AddEndpoint__AddEndpointWithCorrectRoute()
     {
@@ -16,11 +23,15 @@ public class EndpointForgeDataSourceTests
             Route = "/test/route",
             Methods = [ "GET" ]
         };
+        var stubResponseBodyParser = new FakeResponseBodyParser(string.Empty);
         
-        var endpointForgeDataSource = new EndpointForgeDataSource();
+        var endpointForgeDataSource = new EndpointForgeDataSource(
+            _stubLogger, 
+            stubResponseBodyParser,
+            _memoryStreamManager);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
+        
         var endpoint = (RouteEndpoint) endpointForgeDataSource.Endpoints.Single();
-
         endpoint.RoutePattern.RawText.Should().Be(addEndpointRequest.Route);
     }
     
@@ -32,9 +43,14 @@ public class EndpointForgeDataSourceTests
             Route = "/test/route",
             Methods = [ "GET", "POST" ]
         };
+        var stubResponseBodyParser = new FakeResponseBodyParser(string.Empty);
         
-        var endpointForgeDataSource = new EndpointForgeDataSource();
+        var endpointForgeDataSource = new EndpointForgeDataSource(
+            _stubLogger,
+            stubResponseBodyParser,
+            _memoryStreamManager);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
+        
         var methodMetadata = endpointForgeDataSource
             .Endpoints.Single()
             .Metadata.GetMetadata<HttpMethodMetadata>();
@@ -46,7 +62,7 @@ public class EndpointForgeDataSourceTests
     }
     
     [Fact]
-    public async Task When_AddEndpointWithBodyAndContentType_Expect_EndpointResponseContentTypeIsTestTextAndBody()
+    public async Task When_AddEndpointWithBodyAndContentType_Expect_EndpointResponseContentTypeIsTestTextAndHasBody()
     {
         var httpContext = new DefaultHttpContext
         {
@@ -64,11 +80,15 @@ public class EndpointForgeDataSourceTests
                 Body = "Body"
             }
         };
-        var endpointForgeDataSource = new EndpointForgeDataSource();
+        var stubResponseBodyParser = new FakeResponseBodyParser("Body");
         
+        var endpointForgeDataSource = new EndpointForgeDataSource(
+            _stubLogger, 
+            stubResponseBodyParser, 
+            _memoryStreamManager);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
-        var responseBody = await ExtractResponseBody(endpointForgeDataSource, httpContext);
         
+        var responseBody = await ExtractResponseBody(endpointForgeDataSource, httpContext);
         Assert.Multiple(
             () => httpContext.Response.StatusCode.Should().Be(200),
             () => httpContext.Response.ContentType.Should().Be("text/test-text"),
@@ -77,7 +97,7 @@ public class EndpointForgeDataSourceTests
     }
     
     [Fact]
-    public async Task When_AddEndpointWithBodyAndNoContentType_Expect_EndpointResponseContentTypeIsTextPlainAndNoBody()
+    public async Task When_AddEndpointWithBodyAndNoContentType_Expect_EndpointResponseContentTypeIsTextPlainAndBody()
     {
         var httpContext = new DefaultHttpContext
         {
@@ -94,11 +114,15 @@ public class EndpointForgeDataSourceTests
                 Body = "Body"
             }
         };
-        var endpointForgeDataSource = new EndpointForgeDataSource();
+        var stubResponseBodyParser = new FakeResponseBodyParser("Body");
         
+        var endpointForgeDataSource = new EndpointForgeDataSource(
+            _stubLogger,
+            stubResponseBodyParser,
+            _memoryStreamManager);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
-        var responseBody = await ExtractResponseBody(endpointForgeDataSource, httpContext);
         
+        var responseBody = await ExtractResponseBody(endpointForgeDataSource, httpContext);
         Assert.Multiple(
             () => httpContext.Response.StatusCode.Should().Be(200),
             () => httpContext.Response.ContentType.Should().Be("text/plain"),
@@ -124,11 +148,16 @@ public class EndpointForgeDataSourceTests
                 ContentType = "text/plain"
             }
         };
-        var endpointForgeDataSource = new EndpointForgeDataSource();
+        var stubResponseBodyParser = new FakeResponseBodyParser(string.Empty);
+        
+        var endpointForgeDataSource = new EndpointForgeDataSource(
+            _stubLogger,
+            stubResponseBodyParser,
+            _memoryStreamManager);
         
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
+        
         var responseBody = await ExtractResponseBody(endpointForgeDataSource, httpContext);
-
         Assert.Multiple(
             () => httpContext.Response.StatusCode.Should().Be(200),
             () => httpContext.Response.ContentType.Should().BeNull(),
