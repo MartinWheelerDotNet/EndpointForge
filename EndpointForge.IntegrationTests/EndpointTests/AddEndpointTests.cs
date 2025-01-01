@@ -93,8 +93,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     {
         var addEndpointRequest = new
         {
-            Route = string.Empty, 
-            Priority = 0, 
+            Route = string.Empty,
             Methods = Array.Empty<string>()
         };
         var expectedResponseBody = new

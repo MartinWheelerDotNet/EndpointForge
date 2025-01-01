@@ -17,7 +17,7 @@ public class EndpointForgeDataSource(
         var endpoint = new RouteEndpointBuilder(
                 BuildResponse(addEndpointRequest.Response),
                 RoutePatternFactory.Parse(addEndpointRequest.Route),
-                addEndpointRequest.Priority)
+                0)
             {
                 Metadata = { new HttpMethodMetadata(addEndpointRequest.Methods) }
             }
