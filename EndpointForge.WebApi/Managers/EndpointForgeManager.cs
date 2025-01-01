@@ -8,7 +8,8 @@ using EndpointForge.Abstractions.Models;
 namespace EndpointForge.WebApi.Managers;
 
 public class EndpointForgeManager(
-    IEndpointForgeDataSource endpointForge, ILogger<EndpointForgeManager> logger) : IEndpointForgeManager
+    ILogger<EndpointForgeManager> logger,
+    IEndpointForgeDataSource endpointForge) : IEndpointForgeManager
 {
     private const string ConflictMessage = "The requested endpoint has already been added for {0} method";
     private const string RouteMissingOrEmptyMessage = "Endpoint request `route` is empty or whitespace";

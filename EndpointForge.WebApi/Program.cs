@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using EndpointForge.WebApi.Extensions;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
+using EndpointForge.ServiceDefaults;
 using Microsoft.AspNetCore.Http.Json;
 
 namespace EndpointForge.WebApi;
@@ -63,8 +64,10 @@ internal class Program
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
 
-        builder.Services.AddEndpointForge();
-        builder.Services.AddOpenApi();
+        builder.Services
+            .AddEndpointForge()
+            .AddOpenApi();
+        
         builder.AddServiceDefaults();
     }
 }

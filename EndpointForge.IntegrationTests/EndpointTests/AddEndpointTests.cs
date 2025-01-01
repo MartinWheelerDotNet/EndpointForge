@@ -7,11 +7,13 @@ namespace EndpointForge.IntegrationTests.EndpointTests;
 
 public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
 {
+    private const string GuidPattern = 
+        @"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b";
+    
     private const string WebApiName = "webapi";
     private const string AddEndpointRoute = "/add-endpoint";
 
     #region Error Result Tests
-
     [Fact]
     public async Task CallingAddEndpointWithoutEndpointDetailsRespondsWithBadRequest()
     {
@@ -113,11 +115,9 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
-
     #endregion
 
     #region Conflict Result Tests
-
     [Fact]
     public async Task CallingAddEndpointWithDuplicateDetailsRespondsWithConflict()
     {
@@ -147,7 +147,6 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
-
     #endregion
 
     #region Created Result Tests
@@ -337,7 +336,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-
+        
         await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -376,6 +375,5 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             () => response.Content.Headers.ContentLength.Should().Be(21),
             () => responseBody.Should().Be("String response body."));
     }
-
     #endregion
 }

@@ -3,17 +3,20 @@ using EndpointForge.Abstractions.Extensions;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using Microsoft.AspNetCore.Routing.Patterns;
-using static System.Text.Encoding;
+using Microsoft.IO;
 
 namespace EndpointForge.WebApi.DataSources;
 
-public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForgeDataSource
+public class EndpointForgeDataSource(
+    ILogger<EndpointForgeDataSource> logger,
+    IResponseBodyParser bodyParser,
+    RecyclableMemoryStreamManager memoryStreamManager) : MutableEndpointDataSource, IEndpointForgeDataSource
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
         var endpoint = new RouteEndpointBuilder(
-                BuildResponse(addEndpointRequest.Response), 
-                RoutePatternFactory.Parse(addEndpointRequest.Route), 
+                BuildResponse(addEndpointRequest.Response),
+                RoutePatternFactory.Parse(addEndpointRequest.Route),
                 addEndpointRequest.Priority)
             {
                 Metadata = { new HttpMethodMetadata(addEndpointRequest.Methods) }
@@ -22,21 +25,29 @@ public class EndpointForgeDataSource : MutableEndpointDataSource, IEndpointForge
         base.AddEndpoint(endpoint, apply);
     }
 
-    private static RequestDelegate BuildResponse(EndpointResponseDetails responseDetails)
+    private RequestDelegate BuildResponse(EndpointResponseDetails responseDetails)
         => async context =>
         {
+            logger.LogInformation("Building response headers");
             context.Response.StatusCode = responseDetails.StatusCode;
             context.Response.ContentType = GetContentType(responseDetails);
 
+            logger.LogInformation("Building response body and writing the response body");
             if (!string.IsNullOrWhiteSpace(responseDetails.Body))
             {
-                context.Response.ContentLength = UTF8.GetByteCount(responseDetails.Body!);
-                await context.Response.WriteAsync(responseDetails.Body);
+                await using var memoryStream = memoryStreamManager.GetStream(responseDetails.Body);
+                await bodyParser.ProcessResponseBody(memoryStream, responseDetails.Body);
+                context.Response.ContentLength = memoryStream.Length;
+                
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                await memoryStream.CopyToAsync(context.Response.Body);
             }
+            logger.LogInformation("Response fully written.");
         };
-    
+
+
     private static string? GetContentType(EndpointResponseDetails responseDetails)
-        => (responseDetails.HasBody(), responseDetails.HasContentType()) switch 
+        => (responseDetails.HasBody(), responseDetails.HasContentType()) switch
         {
             (false, _) => null,
             (true, false) => MediaTypeNames.Text.Plain,
