@@ -16,8 +16,8 @@ public class EndpointForgeManager(
     private const string MethodMissingOrEmptyMessage = "Endpoint request `methods` contains no entries";
     private const string EmptyRequestBodyMessage = "Request body must not be empty";
     
-    private readonly ConcurrentDictionary<EndpointRoutingDetails, EndpointResponseDetails> _endpointDetails = new();
-    private readonly Lock _dictionaryLock = new();
+    private readonly List<EndpointRoutingDetails> _endpointDetails = [];
+    private readonly Lock _listLock = new();
     
     public async Task<IResult> TryAddEndpointAsync(AddEndpointRequest addEndpointRequest)
     {
@@ -70,30 +70,29 @@ public class EndpointForgeManager(
         [NotNullWhen(false)] out ErrorResponse? errorResponse)
     {
         errorResponse = null;
+        var conflictErrors = new List<string>();
 
-        /*
-            Lock the dictionary to ensure no other threads attempt to add or remove from the dictionary
-            between checking if all methods can be added, and adding them.  This is for transactional
-            reasons to prevent some methods being added to the dictionary and not others. 
-        */
-        lock (_dictionaryLock)
+        lock (_listLock)
         {
-            var errors = addEndpointRequest.GetEndpointRoutingDetails()
-                .Where(details => _endpointDetails.ContainsKey(details))
-                .Select(detail => string.Format(ConflictMessage, detail.Method))
-                .ToList();
-
-            if (errors.Count is not 0)
+            foreach (var (route, method) in addEndpointRequest.GetEndpointRoutingDetails())
             {
-                errorResponse = new ErrorResponse(HttpStatusCode.Conflict, errors);
+                var errors = _endpointDetails
+                    .Where(details => details.Route == route && details.Method == method)
+                    .Select(detail => string.Format(ConflictMessage, detail.Method));
+                
+                conflictErrors.AddRange(errors);
+            }
+            
+            if (conflictErrors.Count is not 0)
+            {
+                errorResponse = new ErrorResponse(HttpStatusCode.Conflict, conflictErrors);
                 return false;
             }
 
-            foreach (var detail in addEndpointRequest.GetEndpointRoutingDetails())
-                _endpointDetails.TryAdd(detail, addEndpointRequest.Response);
+            _endpointDetails.AddRange(addEndpointRequest.GetEndpointRoutingDetails());
 
             endpointForge.AddEndpoint(addEndpointRequest);
-            return true; 
         }
+        return true; 
     }
 }
