@@ -11,8 +11,7 @@ public class GenerateGuidRuleTests
     public void GenerateGuidRulePlaceholderIsGenerateGuid()
     {
         var stubGuidGenerator = new FakeGuidGenerator(Guid.Empty);
-        var stubGuidWriter = new FakeGuidWriter();
-        var generateGuidRule = new GenerateGuidRule(stubGuidGenerator, stubGuidWriter);
+        var generateGuidRule = new GenerateGuidRule(stubGuidGenerator);
         
         generateGuidRule.Placeholder.Should().Be("generate:guid");
     }
@@ -22,10 +21,9 @@ public class GenerateGuidRuleTests
     {
         var guid = Guid.NewGuid();
         var stubGuidGenerator = new FakeGuidGenerator(guid);
-        var stubGuidWriter = new FakeGuidWriter();
         await using var streamWriter = new StreamWriter(new MemoryStream());
         
-        var generateGuidRule = new GenerateGuidRule(stubGuidGenerator, stubGuidWriter);
+        var generateGuidRule = new GenerateGuidRule(stubGuidGenerator);
         generateGuidRule.Invoke(streamWriter);
         
         await streamWriter.FlushAsync();
@@ -36,10 +34,4 @@ public class GenerateGuidRuleTests
         
         generatedGuid.Should().Be(guid.ToString());
     }
-}
-
-public class FakeGuidWriter : IGuidWriter
-{
-    public void WriteGuidToStream(Guid guid, StreamWriter streamWriter) => streamWriter.Write(guid.ToString());
-
 }

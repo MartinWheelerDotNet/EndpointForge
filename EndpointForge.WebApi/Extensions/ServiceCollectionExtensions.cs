@@ -5,7 +5,6 @@ using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.WebApi.Factories;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Rules;
-using EndpointForge.WebApi.Writers;
 using Microsoft.IO;
 
 namespace EndpointForge.WebApi.Extensions;
@@ -16,7 +15,6 @@ public static class ServiceCollectionExtensions
         => services
             .AddCoreServices()
             .AddGenerators()
-            .AddRuleWriters()
             .AddGeneratorRules();
 
     private static IServiceCollection AddCoreServices(this IServiceCollection services)
@@ -32,10 +30,6 @@ public static class ServiceCollectionExtensions
         => services
             .AddSingleton<IGuidGenerator, GuidGenerator>();
     
-    private static IServiceCollection AddRuleWriters(this IServiceCollection services) 
-        => services
-            .AddSingleton<IGuidWriter, GuidWriter>();
-
     private static IServiceCollection AddGeneratorRules(this IServiceCollection services)
         => services
             .AddSingleton<IEndpointForgeGeneratorRule, GenerateGuidRule>();
