@@ -14,8 +14,10 @@ public class EndpointForgeDataSource(
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
+        var parameters = addEndpointRequest.Parameters.ToDictionary(p => p.Identifier, p => p.Value);
+        
         var endpoint = new RouteEndpointBuilder(
-                BuildResponse(addEndpointRequest.Response),
+                BuildResponse(addEndpointRequest.Response, parameters),
                 RoutePatternFactory.Parse(addEndpointRequest.Route),
                 0)
             {
@@ -25,7 +27,9 @@ public class EndpointForgeDataSource(
         base.AddEndpoint(endpoint, apply);
     }
 
-    private RequestDelegate BuildResponse(EndpointResponseDetails responseDetails)
+    private RequestDelegate BuildResponse(
+        EndpointResponseDetails responseDetails,
+        IDictionary<string, string> parameters)
         => async context =>
         {
             logger.LogInformation("Building response headers");
@@ -36,12 +40,13 @@ public class EndpointForgeDataSource(
             if (!string.IsNullOrWhiteSpace(responseDetails.Body))
             {
                 await using var memoryStream = memoryStreamManager.GetStream(responseDetails.Body);
-                await bodyParser.ProcessResponseBody(memoryStream, responseDetails.Body);
+                await bodyParser.ProcessResponseBody(memoryStream, responseDetails.Body, parameters);
                 context.Response.ContentLength = memoryStream.Length;
-                
+
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 await memoryStream.CopyToAsync(context.Response.Body);
             }
+
             logger.LogInformation("Response fully written.");
         };
 
