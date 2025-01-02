@@ -5,7 +5,6 @@ using EndpointForge.WebApi.Extensions;
 using EndpointForge.WebApi.Managers;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Rules;
-using EndpointForge.WebApi.Writers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,18 +29,6 @@ public class ServiceCollectionExtensionsTests
     [Theory]
     [InlineData(typeof(IGuidGenerator), typeof(GuidGenerator))]
     public void When_AddEndpointForge_RequiredGeneratorsAreAvailable(Type interfaceType, Type expectedImplementationType)
-    {
-        var serviceCollection = new ServiceCollection();
-        
-        serviceCollection.AddEndpointForge();
-        var serviceProvider = serviceCollection.AddLogging().BuildServiceProvider();
-        
-        serviceProvider.GetService(interfaceType).Should().BeOfType(expectedImplementationType);
-    }
-    
-    [Theory]
-    [InlineData(typeof(IGuidWriter), typeof(GuidWriter))]
-    public void When_AddEndpointForge_RequiredRuleWritersAreAvailable(Type interfaceType, Type expectedImplementationType)
     {
         var serviceCollection = new ServiceCollection();
         

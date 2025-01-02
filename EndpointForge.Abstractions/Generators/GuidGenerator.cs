@@ -4,5 +4,5 @@ namespace EndpointForge.Abstractions.Generators;
 
 public class GuidGenerator : IGuidGenerator
 {
-    public Guid New() => Guid.NewGuid();
+    public Guid New => Guid.NewGuid();
 }
