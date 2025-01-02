@@ -4,7 +4,7 @@ using EndpointForge.Abstractions.Interfaces;
 namespace EndpointForge.WebApi.Tests.Fakes;
 
 [ExcludeFromCodeCoverage]
-internal class FakeEndpointForgeRuleFactory(string? content) : IEndpointForgeRuleFactory
+internal class FakeEndpointForgeRuleFactory(string? content = "") : IEndpointForgeRuleFactory
 {
     public IEndpointForgeGeneratorRule? GetGeneratorRule(ReadOnlySpan<char> placeholder)
         => content is null

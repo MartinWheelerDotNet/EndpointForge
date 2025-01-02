@@ -7,9 +7,6 @@ namespace EndpointForge.IntegrationTests.EndpointTests;
 
 public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
 {
-    private const string GuidPattern = 
-        @"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b";
-    
     private const string WebApiName = "webapi";
     private const string AddEndpointRoute = "/add-endpoint";
 

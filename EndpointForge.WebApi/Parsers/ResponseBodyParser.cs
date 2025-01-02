@@ -4,7 +4,7 @@ namespace EndpointForge.WebApi.Parsers;
 
 public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IResponseBodyParser
 {
-    public async Task ProcessResponseBody(Stream stream, string responseBody)
+    public async Task ProcessResponseBody(Stream stream, string responseBody, IDictionary<string, string> parameters)
     {
         var writer = new StreamWriter(stream);
         
@@ -25,7 +25,7 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
 
             if (IsStartOfPlaceholderEnd(readIndex, bodySpan))
             {
-                WriteSubstitutionRuleResultOrPlaceHolder(writer, "");
+                WriteSubstitutionRuleResultOrPlaceHolder(writer, "", parameters);
                 lastWrittenIndex = readIndex += 2;
                 continue;
             }
@@ -36,8 +36,9 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
             var endOfPlaceholderNameIndex = readIndex + 1;
 
             WriteSubstitutionRuleResultOrPlaceHolder(
-                writer,
-                bodySpan[startOfPlaceholderNameIndex..endOfPlaceholderNameIndex]);
+                writer, 
+                bodySpan[startOfPlaceholderNameIndex..endOfPlaceholderNameIndex],
+                parameters);
             
             readIndex += 3;
             lastWrittenIndex = readIndex;
@@ -48,7 +49,10 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
         await writer.FlushAsync();
     }
 
-    private void WriteSubstitutionRuleResultOrPlaceHolder(StreamWriter writer, ReadOnlySpan<char> placeholderName)
+    private void WriteSubstitutionRuleResultOrPlaceHolder(
+        StreamWriter writer,
+        ReadOnlySpan<char> placeholderName,
+        IDictionary<string, string> parameters)
     {
         if (placeholderName.IsEmpty)
         {
@@ -69,21 +73,51 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
         
         if (instruction.SequenceEqual("generate".AsSpan()))
         {
-            var rule = ruleFactory.GetGeneratorRule(placeholderName);
-            if (rule == null)
-            {
-                WritePlaceholder(writer, placeholderName);
-                return;
-            }
-            
-            rule.Invoke(writer);
+            InvokeGeneratorRule(writer, placeholderName);
+            return;
         }
-        else
+        
+        if (instruction.SequenceEqual("insert".AsSpan()))
+        {
+            var identifier = placeholderName[splitPlaceholder.Current];
+            WriteParameter(writer, identifier, parameters);
+            return;
+        }
+       
+        WritePlaceholder(writer, placeholderName);
+    }
+
+    private static void WriteParameter(
+        StreamWriter writer,
+        ReadOnlySpan<char> identifier,
+        IDictionary<string, string> parameters)
+    {
+        var hasValueBeenWritten = false;
+        foreach (var (key, value) in parameters)
+        {
+            if (!identifier.SequenceEqual(key.AsSpan())) 
+                continue;
+            
+            writer.Write(value);
+            hasValueBeenWritten = true;
+            break;
+        }
+        if (!hasValueBeenWritten)
+            writer.Write("null");
+    }
+
+    private void InvokeGeneratorRule(StreamWriter writer, ReadOnlySpan<char> placeholderName)
+    {
+        var rule = ruleFactory.GetGeneratorRule(placeholderName);
+        if (rule == null)
         {
             WritePlaceholder(writer, placeholderName);
+            return;
         }
+            
+        rule.Invoke(writer);
     }
-    
+
     private static void WritePlaceholder(StreamWriter writer, ReadOnlySpan<char> ruleName)
     {
         writer.Write("{{");
