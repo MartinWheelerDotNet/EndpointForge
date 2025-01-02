@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Routing.Patterns;
+
 namespace EndpointForge.Abstractions.Models;
 
 [Serializable]
