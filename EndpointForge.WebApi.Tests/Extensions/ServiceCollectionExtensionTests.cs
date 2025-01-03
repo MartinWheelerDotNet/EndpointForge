@@ -39,7 +39,8 @@ public class ServiceCollectionExtensionsTests
     }
     
     [Theory]
-    [InlineData(typeof(IEndpointForgeGeneratorRule), typeof(GenerateGuidRule))]
+    [InlineData(typeof(IEndpointForgeRule), typeof(GenerateGuidRule))]
+    [InlineData(typeof(IEndpointForgeRule), typeof(InsertParameterRule))]
     public void When_AddEndpointForge_RequiredEndpointForgesRulesAreAvailable(Type interfaceType, Type expectedImplementationType)
     {
         var serviceCollection = new ServiceCollection();
@@ -47,6 +48,9 @@ public class ServiceCollectionExtensionsTests
         serviceCollection.AddEndpointForge();
         var serviceProvider = serviceCollection.AddLogging().BuildServiceProvider();
         
-        serviceProvider.GetService(interfaceType).Should().BeOfType(expectedImplementationType);
+        serviceProvider.GetServices(interfaceType)
+            .Should()
+            .ContainSingle(service => service != null && service.GetType() == expectedImplementationType);
+            
     }
 }

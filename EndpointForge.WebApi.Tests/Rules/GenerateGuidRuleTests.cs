@@ -1,4 +1,3 @@
-using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.WebApi.Rules;
 using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
@@ -8,16 +7,25 @@ namespace EndpointForge.WebApi.Tests.Rules;
 public class GenerateGuidRuleTests
 {
     [Fact]
-    public void GenerateGuidRulePlaceholderIsGenerateGuid()
+    public void GenerateGuidRuleInstructionShouldBeGenerate()
     {
         var stubGuidGenerator = new FakeGuidGenerator(Guid.Empty);
         var generateGuidRule = new GenerateGuidRule(stubGuidGenerator);
         
-        generateGuidRule.Placeholder.Should().Be("generate:guid");
+        generateGuidRule.Instruction.Should().Be("generate");
     }
     
     [Fact]
-    public async Task When_Invoke_TheProvidedStreamShouldBeTheProvidedGuid()
+    public void GenerateGuidRuleTypeShouldBeGuid()
+    {
+        var stubGuidGenerator = new FakeGuidGenerator(Guid.Empty);
+        var generateGuidRule = new GenerateGuidRule(stubGuidGenerator);
+        
+        generateGuidRule.Type.Should().Be("guid");
+    }
+    
+    [Fact]
+    public async Task When_Invoke_Expect_TheProvidedStreamShouldContainTheProvidedGuid()
     {
         var guid = Guid.NewGuid();
         var stubGuidGenerator = new FakeGuidGenerator(guid);

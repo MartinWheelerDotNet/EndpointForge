@@ -2,5 +2,5 @@ namespace EndpointForge.Abstractions.Interfaces;
 
 public interface IEndpointForgeRuleFactory
 { 
-    IEndpointForgeGeneratorRule? GetGeneratorRule(ReadOnlySpan<char> placeholder);
+    T? GetRule<T>(ReadOnlySpan<char> type) where T : IEndpointForgeRule;
 }

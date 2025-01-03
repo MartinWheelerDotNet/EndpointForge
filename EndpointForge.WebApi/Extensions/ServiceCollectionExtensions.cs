@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
         => services
             .AddCoreServices()
             .AddGenerators()
-            .AddGeneratorRules();
+            .AddRules();
 
     private static IServiceCollection AddCoreServices(this IServiceCollection services)
         => services
@@ -30,7 +30,8 @@ public static class ServiceCollectionExtensions
         => services
             .AddSingleton<IGuidGenerator, GuidGenerator>();
     
-    private static IServiceCollection AddGeneratorRules(this IServiceCollection services)
+    private static IServiceCollection AddRules(this IServiceCollection services)
         => services
-            .AddSingleton<IEndpointForgeGeneratorRule, GenerateGuidRule>();
+            .AddSingleton<IEndpointForgeRule, GenerateGuidRule>()
+            .AddSingleton<IEndpointForgeRule, InsertParameterRule>();
 }
