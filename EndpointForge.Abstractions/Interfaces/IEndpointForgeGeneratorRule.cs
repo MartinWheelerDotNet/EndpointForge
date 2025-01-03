@@ -1,7 +1,6 @@
 namespace EndpointForge.Abstractions.Interfaces;
 
-public interface IEndpointForgeGeneratorRule
+public interface IEndpointForgeGeneratorRule : IEndpointForgeRule
 {
-    public string Placeholder { get; }
     void Invoke(StreamWriter streamWriter);
 }

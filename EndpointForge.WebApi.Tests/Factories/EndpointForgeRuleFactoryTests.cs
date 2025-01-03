@@ -8,27 +8,24 @@ namespace EndpointForge.WebApi.Tests.Factories;
 public class EndpointForgeRuleFactoryTests
 {
     [Fact]
-    public void When_GetGeneratorRuleAndRuleIsNotFound_ThenReturnsNull()
+    public void When_GetRuleGeneratorRuleAndRuleIsNotFound_ThenReturnsNull()
     {
-        var rules = new List<IEndpointForgeGeneratorRule>
-        {
-            new FakeGeneratorRule()
-        };
+        var rules = new List<IEndpointForgeRule> { new FakeGeneratorRule() };
         var ruleFactory = new EndpointForgeRuleFactory(rules);
         
-        var rule = ruleFactory.GetGeneratorRule("generator:test");
+        var rule = ruleFactory.GetRule<IEndpointForgeGeneratorRule>("test");
         
         rule.Should().BeNull();
     }
     
     [Fact]
-    public void When_GetGeneratorRuleAndRuleIsFound_ThenReturnsRule()
+    public void When_GetRuleGeneratorRuleAndRuleIsFound_ThenReturnsRule()
     {
-        var generatorRule = new FakeGeneratorRule("generator:test");
-        var rules = new List<IEndpointForgeGeneratorRule> { generatorRule };
+        var generatorRule = new FakeGeneratorRule("test");
+        var rules = new List<IEndpointForgeRule> { generatorRule };
         var ruleFactory = new EndpointForgeRuleFactory(rules);
 
-        var rule = ruleFactory.GetGeneratorRule("generator:test");
+        var rule = ruleFactory.GetRule<IEndpointForgeGeneratorRule>("test");
         
         rule.Should().Be(generatorRule);
     }
