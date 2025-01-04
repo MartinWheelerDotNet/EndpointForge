@@ -1,13 +1,15 @@
 using System.Buffers;
-using System.Security.Cryptography.X509Certificates;
 using EndpointForge.Abstractions.Interfaces;
 
 namespace EndpointForge.WebApi.Rules;
 
 public class GenerateGuidRule(IGuidGenerator guidGenerator) : IEndpointForgeGeneratorRule
 {
-    private const string RulePlaceholder = "generate:guid";
-    public string Placeholder => RulePlaceholder;
+    private const string RuleInstruction = "generate";
+    private const string RuleType = "guid";
+    public string Instruction => RuleInstruction;
+    public string Type => RuleType;
+    
 
     private const int GuidCharSize = 36;
     private static readonly ArrayPool<char> CharPool = ArrayPool<char>.Shared;

@@ -4,8 +4,9 @@ using EndpointForge.Abstractions.Interfaces;
 namespace EndpointForge.WebApi.Tests.Fakes;
 
 [ExcludeFromCodeCoverage]
-internal class FakeGeneratorRule(string placeholder = "", string content = "") : IEndpointForgeGeneratorRule
+internal class FakeGeneratorRule(string type = "", string value = "") : IEndpointForgeGeneratorRule
 {
-    public string Placeholder => placeholder;
-    public void Invoke(StreamWriter streamWriter) => streamWriter.Write(content);
+    public string Instruction => "generate";
+    public string Type => type;
+    public void Invoke(StreamWriter streamWriter) => streamWriter.Write(value);
 }

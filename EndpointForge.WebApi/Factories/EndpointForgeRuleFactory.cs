@@ -4,21 +4,20 @@ namespace EndpointForge.WebApi.Factories;
 
 public class EndpointForgeRuleFactory : IEndpointForgeRuleFactory
 {
-    private readonly Dictionary<ReadOnlyMemory<char>, IEndpointForgeGeneratorRule> _rules;
+    private readonly Dictionary<ReadOnlyMemory<char>, IEndpointForgeRule> _rules;
 
-    public EndpointForgeRuleFactory(IEnumerable<IEndpointForgeGeneratorRule> generatorRules)
+    public EndpointForgeRuleFactory(IEnumerable<IEndpointForgeRule> endpointForgeRules)
     {
-        _rules = generatorRules.ToDictionary(rule => rule.Placeholder.AsMemory(), rule => rule);
+        var rulesList = endpointForgeRules.ToList();
+        _rules = rulesList.ToDictionary(rule => rule.Type.AsMemory(), rule => rule);
     }
     
-    public IEndpointForgeGeneratorRule? GetGeneratorRule(ReadOnlySpan<char> placeholder)
+    public T? GetRule<T>(ReadOnlySpan<char> type) where T : IEndpointForgeRule
     {
-        foreach (var rule in _rules)
-        {
-            if (rule.Key.Span.SequenceEqual(placeholder)) 
-                return rule.Value;
-        }
-
-        return null;
+        foreach (var (key, value) in _rules)
+            if (key.Span.SequenceEqual(type) && value is T generatorRule) 
+                return generatorRule;
+        
+        return default;
     }
 }
