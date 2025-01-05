@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 
 namespace EndpointForge.Abstractions.Models;
 
-[Serializable]
 public record AddEndpointRequest
 {
     public required string Route { get; init; } = string.Empty;

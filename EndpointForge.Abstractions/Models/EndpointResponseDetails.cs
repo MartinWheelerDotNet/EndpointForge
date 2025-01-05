@@ -1,6 +1,5 @@
 namespace EndpointForge.Abstractions.Models;
 
-[Serializable]
 public record EndpointResponseDetails
 {
     public int StatusCode { get; init; } = 200;
