@@ -1,5 +1,5 @@
-using EndpointForge.WebApi.DataSources;
 using EndpointForge.Abstractions.Exceptions;
+using EndpointForge.Abstractions.Interfaces;
 
 namespace EndpointForge.WebApi.Extensions;
 
@@ -7,11 +7,11 @@ public static class EndpointRouteBuilderExtensions
 {
     public static void UseEndpointForge(this IEndpointRouteBuilder endpoints)
     {
-        var dataSource = endpoints.ServiceProvider.GetService<EndpointForgeDataSource>()
-            ?? throw new EndpointForgeDataSourceNotRegisteredException();
+        var dataSource = endpoints.ServiceProvider.GetService<IEndpointForgeDataSource>()
+            ?? throw new DataSourceNotRegisteredEndpointForgeException();
         
-        endpoints.DataSources.Add(dataSource);
+        endpoints.DataSources.Add((EndpointDataSource) dataSource);
     }
-    
+
     
 }

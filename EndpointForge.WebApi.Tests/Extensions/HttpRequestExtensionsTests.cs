@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EndpointForge.Abstractions.Exceptions;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Extensions;
 using FluentAssertions;
@@ -9,8 +10,9 @@ namespace EndpointForge.WebApi.Tests.Extensions;
 public class HttpRequestExtensionsTests
 {
     #region TryDeserializeRequestAsync Tests
+
     [Fact]
-    public async Task When_DeserializingRequestBodyAndBodyIsValid_Expect_DeserializeResultWithResult()
+    public async Task When_DeserializingRequestBodyAndBodyIsValid_Expect_Deserialized()
     {
         AddEndpointRequest addEndpointRequest = new()
         {
@@ -20,53 +22,45 @@ public class HttpRequestExtensionsTests
         var httpContext = new DefaultHttpContext();
         await httpContext.Request.WriteAsJsonAsync(addEndpointRequest);
 
-        var (result, errors) = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
+        var result = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
 
         Assert.Multiple(
-            () => result.Should().BeEquivalentTo(addEndpointRequest),
-            () => errors.Should().BeNull());
+            () => result.Should().BeOfType<AddEndpointRequest>(),
+            () => result.Should().BeEquivalentTo(addEndpointRequest));
     }
-
+    
     [Fact]
-    public async Task When_DeserializingRequestBodyAndBodyIsInvalid_Expect_UnprocessableEntityErrorResponse()
+    public async Task When_DeserializingRequestBodyAndBodyIsIncorrectType_Expect_BadRequestException()
     {
-        var addEndpointRequest = new
+        var incorrectType = new
         {
-            Route = "/test-route"
+            UnknownField = "unknown-field-value"
         };
         
-        var expectedErrorResponse = new ErrorResponse(
-            HttpStatusCode.UnprocessableEntity, 
-            ["Request body is invalid."]);
-        
         var httpContext = new DefaultHttpContext();
-        await httpContext.Request.WriteAsJsonAsync(addEndpointRequest);
+        await httpContext.Request.WriteAsJsonAsync(incorrectType);
 
-        var (result, errors) = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
-
+        var exception = await Assert.ThrowsAsync<BadRequestEndpointForgeException>(
+            async () => await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>());
+        
         Assert.Multiple(
-            () => result.Should().BeNull(),
-            () => errors.Should().BeEquivalentTo(expectedErrorResponse));
+            () => exception.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => exception.Message.Should().Be("Request body was of an unknown type or is missing required fields."));
     }
-    
+
     [Fact]
-    public async Task When_DeserializingRequestBodyAndBodyIsEmpty_Expect_BadRequestErrorResponse()
+    public async Task When_DeserializingRequestBodyAndBodyIsEmpty_Expect_BadRequestExceptionThrown()
     {
-        var expectedErrorResponse = new ErrorResponse(
-            HttpStatusCode.BadRequest,
-            ["Request body must not be empty."]);
-        
         var httpContext = new DefaultHttpContext();
 
-        var (result, errors) = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
-
-        Assert.Multiple(
-            () => result.Should().BeNull(),
-            () => errors.Should().BeEquivalentTo(expectedErrorResponse));
+        await Assert.ThrowsAsync<EmptyRequestBodyEndpointForgeException>(
+            async () => await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>());
     }
+
     #endregion
-    
+
     #region WriteAsJsonAsync Tests
+
     [Fact]
     public async Task When_WritingAsJson_Expect_DataWrittenToResponseBody()
     {
@@ -79,9 +73,9 @@ public class HttpRequestExtensionsTests
 
         await httpContext.Request.WriteAsJsonAsync(addEndpointRequest);
         var result = await httpContext.Request.ReadFromJsonAsync<AddEndpointRequest>();
-        
+
         result.Should().BeEquivalentTo(addEndpointRequest);
     }
-    
+
     #endregion
 }

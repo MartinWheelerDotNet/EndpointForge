@@ -12,15 +12,12 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
 
     #region Error Result Tests
     [Fact]
-    public async Task CallingAddEndpointWithoutEndpointDetailsRespondsWithBadRequest()
+    public async Task When_CallingAddEndpointWithoutEndpointDetails_Expect_BadRequest()
     {
         var expectedResponseBody = new
         {
             StatusCode = HttpStatusCode.BadRequest,
-            Errors = new[]
-            {
-                "Request body must not be empty."
-            }
+            Message = "Request body is empty or of an unsupported type."
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
 
@@ -33,7 +30,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
 
     [Fact]
-    public async Task CallingAddEndpointWithoutRouteRespondsWithUnprocessableEntity()
+    public async Task When_CallingAddEndpointWithoutRoute_Expect_UnprocessableEntity()
     {
         var addEndpointRequest = new
         {
@@ -44,10 +41,12 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         };
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.UnprocessableEntity,
-            Errors = new[]
+            StatusCode = HttpStatusCode.BadRequest,
+            Message = "Request body was of an unknown type or is missing required fields.",
+            Errors = new []
             {
-                "Request body is invalid."
+                "JSON deserialization for type 'EndpointForge.Abstractions.Models.AddEndpointRequest' " +
+                "was missing required properties including: 'route'."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -56,12 +55,12 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
+            () => response.StatusCode.Should().Be(HttpStatusCode.BadRequest),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
 
     [Fact]
-    public async Task CallingAddEndpointWithoutMethodsRespondsWithUnprocessableEntity()
+    public async Task When_CallingAddEndpointWithoutMethods_Expect_BadRequest()
     {
         var addEndpointRequest = new
         {
@@ -69,10 +68,40 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         };
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.UnprocessableEntity,
+            StatusCode = HttpStatusCode.BadRequest,
+            Message = "Request body was of an unknown type or is missing required fields.",
             Errors = new[]
             {
-                "Request body is invalid."
+                "JSON deserialization for type 'EndpointForge.Abstractions.Models.AddEndpointRequest' " +
+                "was missing required properties including: 'methods'."
+                
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+
+        Assert.Multiple(
+            () => response.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
+    }
+    
+    [Fact]
+    public async Task When_CallingAddEndpointWithMSingleEmptyElement_Expect_UnprocessableEntityWithSingleError()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/single-empty-element",
+            Methods = Array.Empty<string>()
+        };
+        var expectedResponseBody = new
+        {
+            StatusCode = HttpStatusCode.UnprocessableEntity,
+            Message = "Request contains invalid JSON body which cannot be processed.",
+            Errors = new[]
+            {
+                "Endpoint request `methods` contains no entries"
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -86,7 +115,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
 
     [Fact]
-    public async Task CallingAddEndpointWithMultipleEmptyElementsRespondsWithUnprocessableEntityWithMultipleErrors()
+    public async Task When_CallingAddEndpointWithMultipleEmptyElements_Expect_UnprocessableEntityWithMultipleErrors()
     {
         var addEndpointRequest = new
         {
@@ -96,6 +125,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var expectedResponseBody = new
         {
             StatusCode = HttpStatusCode.UnprocessableEntity,
+            Message = "Request contains invalid JSON body which cannot be processed.",
             Errors = new[]
             {
                 "Endpoint request `route` is empty or whitespace",

@@ -4,6 +4,7 @@ using EndpointForge.WebApi.Extensions;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.ServiceDefaults;
+using EndpointForge.WebApi.Middleware;
 using Microsoft.AspNetCore.Http.Json;
 
 namespace EndpointForge.WebApi;
@@ -21,6 +22,8 @@ internal class Program
 
         application.MapDefaultEndpoints();
         application.UseEndpointForge();
+        application.UseMiddleware<ExceptionHandlingMiddleware>();
+        
 
         if (application.Environment.IsDevelopment()) 
             application.MapOpenApi();
@@ -44,16 +47,10 @@ internal class Program
     private static async Task<IResult> AddEndpoint(ILogger<Program> logger, HttpRequest httpRequest, IEndpointForgeManager endpointManager)
     {
         logger.LogInformation("Add endpoint request received.");
-        var (addEndpointRequest, errorResponse) = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
+        var addEndpointRequest = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
 
-        if (errorResponse is null)
-        {
-            logger.LogInformation("Deserialized AddEndpointRequest.");
-            return await endpointManager.TryAddEndpointAsync(addEndpointRequest!);
-        } 
-            
-        logger.LogErrorResponse(errorResponse);
-        return errorResponse.GetTypedResult();
+        logger.LogInformation("Deserialized AddEndpointRequest.");
+        return await endpointManager.TryAddEndpointAsync(addEndpointRequest);
     }
     #endregion
 
