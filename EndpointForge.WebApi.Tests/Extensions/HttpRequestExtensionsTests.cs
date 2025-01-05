@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text;
+using System.Text.Json;
 using EndpointForge.Abstractions.Exceptions;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Extensions;
@@ -20,7 +22,7 @@ public class HttpRequestExtensionsTests
             Methods = ["GET", "POST", "PUT", "DELETE"]
         };
         var httpContext = new DefaultHttpContext();
-        await httpContext.Request.WriteAsJsonAsync(addEndpointRequest);
+        await WriteAsJsonAsync(httpContext.Request, addEndpointRequest);
 
         var result = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
 
@@ -28,7 +30,7 @@ public class HttpRequestExtensionsTests
             () => result.Should().BeOfType<AddEndpointRequest>(),
             () => result.Should().BeEquivalentTo(addEndpointRequest));
     }
-    
+
     [Fact]
     public async Task When_DeserializingRequestBodyAndBodyIsIncorrectType_Expect_BadRequestException()
     {
@@ -36,13 +38,13 @@ public class HttpRequestExtensionsTests
         {
             UnknownField = "unknown-field-value"
         };
-        
+
         var httpContext = new DefaultHttpContext();
-        await httpContext.Request.WriteAsJsonAsync(incorrectType);
+        await WriteAsJsonAsync(httpContext.Request, incorrectType);
 
         var exception = await Assert.ThrowsAsync<BadRequestEndpointForgeException>(
             async () => await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>());
-        
+
         Assert.Multiple(
             () => exception.StatusCode.Should().Be(HttpStatusCode.BadRequest),
             () => exception.Message.Should().Be("Request body was of an unknown type or is missing required fields."));
@@ -59,23 +61,15 @@ public class HttpRequestExtensionsTests
 
     #endregion
 
-    #region WriteAsJsonAsync Tests
-
-    [Fact]
-    public async Task When_WritingAsJson_Expect_DataWrittenToResponseBody()
+    private static async Task WriteAsJsonAsync<T>(HttpRequest request, T data)
     {
-        AddEndpointRequest addEndpointRequest = new()
-        {
-            Route = "/test-route",
-            Methods = ["GET", "POST", "PUT", "DELETE"]
-        };
-        var httpContext = new DefaultHttpContext();
+        request.ContentType = "application/json";
 
-        await httpContext.Request.WriteAsJsonAsync(addEndpointRequest);
-        var result = await httpContext.Request.ReadFromJsonAsync<AddEndpointRequest>();
+        var json = JsonSerializer.Serialize(data);
+        var bytes = Encoding.UTF8.GetBytes(json);
 
-        result.Should().BeEquivalentTo(addEndpointRequest);
+        request.Body = new MemoryStream(bytes);
+        await request.Body.FlushAsync();
+        request.Body.Seek(0, SeekOrigin.Begin);
     }
-
-    #endregion
 }

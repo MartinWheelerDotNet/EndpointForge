@@ -51,6 +51,6 @@ public class ServiceCollectionExtensionsTests
         serviceProvider.GetServices(interfaceType)
             .Should()
             .ContainSingle(service => service != null && service.GetType() == expectedImplementationType);
-            
+        
     }
 }
