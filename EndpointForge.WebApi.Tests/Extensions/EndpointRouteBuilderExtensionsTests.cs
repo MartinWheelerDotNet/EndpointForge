@@ -37,6 +37,6 @@ public class EndpointRouteBuilderExtensionsTests
         
         stubBuilder.Invoking(builder => builder.UseEndpointForge())
             .Should()
-            .ThrowExactly<EndpointForgeDataSourceNotRegisteredException>();
+            .ThrowExactly<DataSourceNotRegisteredEndpointForgeException>();
     }
 }

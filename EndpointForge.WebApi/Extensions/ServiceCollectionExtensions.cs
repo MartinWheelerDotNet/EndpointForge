@@ -19,9 +19,8 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddCoreServices(this IServiceCollection services)
         => services
-            .AddSingleton<EndpointForgeDataSource>()
             .AddSingleton<RecyclableMemoryStreamManager>()
-            .AddSingleton<IEndpointForgeDataSource>(provider => provider.GetRequiredService<EndpointForgeDataSource>())
+            .AddSingleton<IEndpointForgeDataSource, EndpointForgeDataSource>()
             .AddSingleton<IEndpointForgeManager, EndpointForgeManager>()
             .AddSingleton<IResponseBodyParser, ResponseBodyParser>()
             .AddSingleton<IEndpointForgeRuleFactory, EndpointForgeRuleFactory>();
