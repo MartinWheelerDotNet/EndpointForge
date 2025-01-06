@@ -5,9 +5,9 @@ namespace EndpointForge.Abstractions.Models;
 public record AddEndpointRequest
 {
     public required string Route { get; init; } = string.Empty;
-    public required ImmutableList<string> Methods { get; init; } = [];
+    public required List<string> Methods { get; init; } = [];
     public EndpointResponseDetails Response { get; init; } = new();
-    public ImmutableList<EndpointForgeParameterDetails> Parameters { get; init; } = [];
+    public List<EndpointForgeParameterDetails> Parameters { get; init; } = [];
     
     public IEnumerable<EndpointRoutingDetails> GetEndpointRoutingDetails() => 
         Methods.Select(method => new EndpointRoutingDetails(Route, method));
