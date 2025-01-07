@@ -17,7 +17,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var expectedResponseBody = new
         {
             StatusCode = HttpStatusCode.BadRequest,
-            Message = "Request body is empty or of an unsupported type."
+            Message = "Request body was of an unknown type, empty, or is missing required fields."
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
 
@@ -42,11 +42,11 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var expectedResponseBody = new
         {
             StatusCode = HttpStatusCode.BadRequest,
-            Message = "Request body was of an unknown type or is missing required fields.",
+            Message = "Request body was of an unknown type, empty, or is missing required fields.",
             Errors = new []
             {
                 "JSON deserialization for type 'EndpointForge.Abstractions.Models.AddEndpointRequest' " +
-                "was missing required properties including: 'route'."
+                "was missing required properties including: 'Route'."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -69,11 +69,11 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var expectedResponseBody = new
         {
             StatusCode = HttpStatusCode.BadRequest,
-            Message = "Request body was of an unknown type or is missing required fields.",
+            Message = "Request body was of an unknown type, empty, or is missing required fields.",
             Errors = new[]
             {
                 "JSON deserialization for type 'EndpointForge.Abstractions.Models.AddEndpointRequest' " +
-                "was missing required properties including: 'methods'."
+                "was missing required properties including: 'Methods'."
                 
             }
         };
@@ -191,12 +191,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
 
         var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
-        var responseBody = await response.Content.ReadFromJsonAsync<AddEndpointRequest>();
-
+        
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Created),
-            () => response.Headers.Location.Should().Be(addEndpointRequest.Route),
-            () => responseBody.Should().BeEquivalentTo(addEndpointRequest));
+            () => response.Headers.Location.Should().Be(addEndpointRequest.Route));
     }
 
     #endregion

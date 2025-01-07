@@ -47,7 +47,9 @@ public class HttpRequestExtensionsTests
 
         Assert.Multiple(
             () => exception.StatusCode.Should().Be(HttpStatusCode.BadRequest),
-            () => exception.Message.Should().Be("Request body was of an unknown type or is missing required fields."));
+            () => exception.Message
+                .Should()
+                .Be("Request body was of an unknown type, empty, or is missing required fields."));
     }
 
     [Fact]
@@ -55,8 +57,14 @@ public class HttpRequestExtensionsTests
     {
         var httpContext = new DefaultHttpContext();
 
-        await Assert.ThrowsAsync<EmptyRequestBodyEndpointForgeException>(
+        var exception = await Assert.ThrowsAsync<BadRequestEndpointForgeException>(
             async () => await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>());
+        
+        Assert.Multiple(
+            () => exception.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => exception.Message
+                .Should()
+                .Be("Request body was of an unknown type, empty, or is missing required fields."));
     }
 
     #endregion

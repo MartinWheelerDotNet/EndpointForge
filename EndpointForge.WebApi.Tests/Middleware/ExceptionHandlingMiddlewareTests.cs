@@ -49,7 +49,7 @@ public class ExceptionHandlingMiddlewareTests
     public async Task When_UnhandledExceptionIsThrown_Expect_ResponseWithBadRequestAndGenericMessage()
     {
         const string errorMessage = "test-exception-message";
-        const string exceptionMessage = "Request body was of an unknown type or is missing required fields.";
+        const string exceptionMessage = "Request body was of an unknown type, empty, or is missing required fields.";
         var unhandledException = new Exception("test-exception-message");
         var expectedErrorResponse = new ErrorResponse(HttpStatusCode.BadRequest, exceptionMessage, [errorMessage]);
 

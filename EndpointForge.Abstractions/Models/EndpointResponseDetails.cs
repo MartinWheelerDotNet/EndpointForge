@@ -1,8 +1,8 @@
 namespace EndpointForge.Abstractions.Models;
 
-public record EndpointResponseDetails
+public class EndpointResponseDetails
 {
-    public int StatusCode { get; init; } = 200;
-    public string? ContentType { get; init; }
-    public string? Body {get; init; }
+    public int StatusCode { get; set; } = 200;
+    public string? ContentType { get; set; }
+    public string? Body {get; set; }
 }

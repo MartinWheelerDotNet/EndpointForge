@@ -26,13 +26,9 @@ public static class HttpRequestExtensions
              var result = JsonSerializer.Deserialize<T>(ref reader, Options);
              return result ?? throw new InvalidRequestBodyEndpointForgeException();
          }
-         catch (JsonException exception)
+         catch (Exception exception)
          {
              throw new BadRequestEndpointForgeException([exception.Message]);
-         }
-         catch
-         {
-             throw new EmptyRequestBodyEndpointForgeException();
          }
     }
 }
