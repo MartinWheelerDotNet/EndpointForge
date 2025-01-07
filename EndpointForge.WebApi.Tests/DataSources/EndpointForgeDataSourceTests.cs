@@ -43,10 +43,7 @@ public class EndpointForgeDataSourceTests
         {
             Route = "/test/route",
             Methods = ["GET"],
-            Parameters = new List<EndpointForgeParameterDetails>
-            {
-                new("test-parameter", "test-parameter-value")
-            }.ToImmutableList()
+            Parameters = [new EndpointForgeParameterDetails("test-parameter", "test-parameter-value")]
         };
         var stubResponseBodyParser = new FakeResponseBodyParser(string.Empty);
 

@@ -25,7 +25,7 @@ public class EndpointForgeManager(
         logger.LogAddEndpointRequestCompleted(addEndpointRequest);
         
         await Task.CompletedTask;
-        return TypedResults.Created(addEndpointRequest.Route, addEndpointRequest);
+        return TypedResults.Created(addEndpointRequest.Route);
     }
 
     private void ValidateEndpointRequestOrThrow(AddEndpointRequest addEndpointRequest) 

@@ -38,8 +38,9 @@ public class EndpointForgeManagerTests
 
         var result = await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest);
 
-        _stubEndpointForgeDataSource.AddedEndpoints.Should().ContainSingle(e => e == addEndpointRequest);
-        result.Should().BeOfType<Created<AddEndpointRequest>>();
+        Assert.Multiple(
+            () => _stubEndpointForgeDataSource.AddedEndpoints.Should().ContainSingle(e => e == addEndpointRequest),
+            () => result.Should().BeOfType<Created>());
     }
 
     [Fact]

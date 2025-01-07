@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net.Mime;
 using EndpointForge.Abstractions.Extensions;
 using EndpointForge.Abstractions.Interfaces;
@@ -14,8 +15,13 @@ public class EndpointForgeDataSource(
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
-        var parameters = addEndpointRequest.Parameters.ToDictionary(p => p.Identifier, p => p.Value);
-        
+        var parameters = new Dictionary<string, string>(addEndpointRequest.Parameters.Count);
+        foreach (var parameter in addEndpointRequest.Parameters)
+        {
+            parameters[parameter.Identifier] = parameter.Value;
+        }
+
+        // Create the endpoint
         var endpoint = new RouteEndpointBuilder(
                 BuildResponse(addEndpointRequest.Response, parameters),
                 RoutePatternFactory.Parse(addEndpointRequest.Route),
@@ -24,6 +30,8 @@ public class EndpointForgeDataSource(
                 Metadata = { new HttpMethodMetadata(addEndpointRequest.Methods) }
             }
             .Build();
+
+        // Add endpoint to the data source
         base.AddEndpoint(endpoint, apply);
     }
 
