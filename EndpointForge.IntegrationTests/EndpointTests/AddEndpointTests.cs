@@ -400,4 +400,43 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             () => responseBody.Should().Be("String response body."));
     }
     #endregion
+    
+    #region Parameter Tests
+
+    [Fact]
+    public async Task When_ProvidingStaticParameter_Expect_ResponseBodyToContainThatParameter()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-with-static-parameter",
+            Methods = new[]
+            {
+                "GET"
+            },
+            Response = new
+            {
+                StatusCode = 201,
+                ContentType = "text/test-type",
+                Body = "{{insert:parameter:test-parameter}}"
+            },
+            Parameters = new[]
+            {
+                new
+                {
+                    Type = "static",
+                    Identifier = "test-parameter",
+                    Value = "test-value"
+                    
+                }
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        
+         responseBody.Should().Be("test-value");
+    }
+    #endregion
 }
