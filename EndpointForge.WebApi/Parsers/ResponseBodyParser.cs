@@ -1,14 +1,30 @@
 using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions.Models;
 
 namespace EndpointForge.WebApi.Parsers;
 
-public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IResponseBodyParser
+public class ResponseBodyParser(
+    ILogger<ResponseBodyParser> logger,
+    IEndpointForgeRuleFactory ruleFactory) : IResponseBodyParser
 {
-    public async Task ProcessResponseBody(Stream stream, string responseBody, IDictionary<string, string> parameters)
+    public async Task ProcessResponseBody(
+        Stream stream, 
+        string responseBody, 
+        List<EndpointForgeParameterDetails> parameters)
     {
+        logger.LogInformation("Processing Response Body");
         var streamWriter = new StreamWriter(stream);
         var bodySpan = responseBody.AsSpan();
         var lastWrittenIndex = 0;
+
+        var processedParameters = new Dictionary<string, string>();
+        foreach (var parameter in parameters)
+        {
+            if (parameter.Type == "static")
+            {
+                processedParameters.Add(parameter.Identifier, parameter.Value);
+            }
+        }
 
         for (var readIndex = 0; readIndex < bodySpan.Length; readIndex++)
         {
@@ -30,7 +46,7 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
             readIndex++;
             var placeholderName = bodySpan[startOfPlaceholderNameIndex..readIndex];
 
-            if (!TryInvokeRule(streamWriter, placeholderName, parameters))
+            if (!TryInvokeRule(streamWriter, placeholderName, processedParameters))
             {
                 WritePlaceholder(streamWriter, placeholderName);
             }
@@ -40,6 +56,7 @@ public class ResponseBodyParser(IEndpointForgeRuleFactory ruleFactory) : IRespon
         
         streamWriter.Write(bodySpan[lastWrittenIndex..]);
         await streamWriter.FlushAsync();
+        logger.LogInformation("Processed Response Body");
     }
  
     private bool TryInvokeRule(

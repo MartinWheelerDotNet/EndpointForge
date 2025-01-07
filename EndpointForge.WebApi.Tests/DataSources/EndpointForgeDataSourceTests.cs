@@ -43,7 +43,7 @@ public class EndpointForgeDataSourceTests
         {
             Route = "/test/route",
             Methods = ["GET"],
-            Parameters = [new EndpointForgeParameterDetails("test-parameter", "test-parameter-value")]
+            Parameters = [new EndpointForgeParameterDetails("static","test-parameter", "test-parameter-value")]
         };
         var stubResponseBodyParser = new FakeResponseBodyParser(string.Empty);
 

@@ -34,9 +34,9 @@ public class EndpointForgeManager(
         
         if (string.IsNullOrWhiteSpace(addEndpointRequest.Route))
             errors.Add(RouteMissingOrEmptyMessage);
-        if (addEndpointRequest.Methods.Count == 0)
+        if (addEndpointRequest.Methods.Count is 0)
             errors.Add(MethodMissingOrEmptyMessage);
-
+        
         if (errors.Count is not 0) throw new InvalidRequestBodyEndpointForgeException(errors);
 
         logger.LogInformation("Successfully validated the add endpoint request.");
@@ -56,7 +56,6 @@ public class EndpointForgeManager(
                 
                 errors.AddRange(currentErrors);
             }
-
             
             if (errors.Count is not 0) throw new ConflictEndpointForgeException(errors);
             

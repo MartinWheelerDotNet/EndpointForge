@@ -12,9 +12,12 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
     private readonly List<Endpoint> _endpoints = [];
     private CancellationTokenSource _cancellationTokenSource;
     private IChangeToken _changeToken;
+
+    private readonly ILogger<MutableEndpointDataSource> _logger;
     
-    protected MutableEndpointDataSource()
+    protected MutableEndpointDataSource(ILogger<MutableEndpointDataSource> logger)
     {
+        _logger = logger;
         _cancellationTokenSource = new CancellationTokenSource();
         _changeToken = new CancellationChangeToken(_cancellationTokenSource.Token);
     }
@@ -44,6 +47,8 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
 
             oldCancellationTokenSource.Cancel();
         }
+
+        _logger.LogInformation("Endpoints Refreshed.");
     }
 
     protected void AddEndpoint(Endpoint endpoint, bool apply = true)

@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Net.Mime;
 using EndpointForge.Abstractions.Extensions;
 using EndpointForge.Abstractions.Interfaces;
@@ -11,33 +10,24 @@ namespace EndpointForge.WebApi.DataSources;
 public class EndpointForgeDataSource(
     ILogger<EndpointForgeDataSource> logger,
     IResponseBodyParser bodyParser,
-    RecyclableMemoryStreamManager memoryStreamManager) : MutableEndpointDataSource, IEndpointForgeDataSource
+    RecyclableMemoryStreamManager memoryStreamManager) : MutableEndpointDataSource(logger), IEndpointForgeDataSource
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
-        var parameters = new Dictionary<string, string>(addEndpointRequest.Parameters.Count);
-        foreach (var parameter in addEndpointRequest.Parameters)
-        {
-            parameters[parameter.Identifier] = parameter.Value;
-        }
-
-        // Create the endpoint
         var endpoint = new RouteEndpointBuilder(
-                BuildResponse(addEndpointRequest.Response, parameters),
+                BuildResponse(addEndpointRequest.Response, addEndpointRequest.Parameters.ToList()),
                 RoutePatternFactory.Parse(addEndpointRequest.Route),
                 0)
             {
                 Metadata = { new HttpMethodMetadata(addEndpointRequest.Methods) }
             }
             .Build();
-
-        // Add endpoint to the data source
         base.AddEndpoint(endpoint, apply);
     }
 
     private RequestDelegate BuildResponse(
         EndpointResponseDetails responseDetails,
-        IDictionary<string, string> parameters)
+        List<EndpointForgeParameterDetails> parameters)
         => async context =>
         {
             logger.LogInformation("Building response headers");
@@ -47,11 +37,12 @@ public class EndpointForgeDataSource(
             logger.LogInformation("Building response body and writing the response body");
             if (!string.IsNullOrWhiteSpace(responseDetails.Body))
             {
-                await using var memoryStream = memoryStreamManager.GetStream(responseDetails.Body);
+                await using var memoryStream = memoryStreamManager.GetStream();
                 await bodyParser.ProcessResponseBody(memoryStream, responseDetails.Body, parameters);
-                context.Response.ContentLength = memoryStream.Length;
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
+
+                context.Response.ContentLength = memoryStream.Length;
                 await memoryStream.CopyToAsync(context.Response.Body);
             }
 
