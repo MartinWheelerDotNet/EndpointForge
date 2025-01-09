@@ -1,22 +1,25 @@
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace EndpointForge.WebApi.Tests.Parsers;
 
 public class ResponseBodyParserTests
 {
     private static readonly ILogger<ResponseBodyParser> StubLogger = new NullLogger<ResponseBodyParser>();
+    private static readonly FakeEndpointForgeRuleFactory StubEndpointForgeRuleFactory = 
+        new(new Mock<IEndpointForgeRule>().Object);
+    
     #region General Placeholder Tests
     [Fact]
     public async Task When_ProcessResponseBodyAndBodyContainsNoPlaceholders_Expect_StreamContainsTheOriginalBody()
     {
         const string body = "This is a response body without any placeholders.";
-        var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(new FakeGeneratorRule());
-        var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
+        var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
         await responseBodyParser.ProcessResponseBody(stream, body, new());
@@ -31,8 +34,7 @@ public class ResponseBodyParserTests
     public async Task When_ProcessResponseBodyWithInvalidPlaceholder_Expect_StreamContainsPlaceholder()
     {
         const string body = "The placeholder '{{generate}}' is not valid.";
-        var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory();
-        var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
+        var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
         await responseBodyParser.ProcessResponseBody(stream, body, new());
@@ -47,8 +49,7 @@ public class ResponseBodyParserTests
     public async Task When_ProcessResponseBodyWithInvalidPlaceholderInstruction_Expect_StreamContainsThePlaceholder()
     {
         const string body = "The placeholder instruction '{{test:guid}}' is not valid.";
-        var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory();
-        var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
+        var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
         await responseBodyParser.ProcessResponseBody(stream, body, new());
@@ -64,8 +65,7 @@ public class ResponseBodyParserTests
     {
         const string body = "The placeholder instruction '{{}}' is empty.";
         const string expectedBody = "The placeholder instruction '' is empty.";
-        var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory();
-        var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
+        var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
         await responseBodyParser.ProcessResponseBody(stream, body, new());
@@ -76,7 +76,6 @@ public class ResponseBodyParserTests
         responseBody.Should().Be(expectedBody);
     }
     
-        
     [Fact]
     public async Task When_ProcessResponseBodyWithUnknownGeneratePlaceholder_Expect_StreamContainsPlaceholder()
     {
@@ -95,9 +94,10 @@ public class ResponseBodyParserTests
     }
     
     [Fact]
-    public async Task When_ProcessResponseBodyWithUnknownInsertPlaceholder_Expect_StreamContainsPlaceholder()
+    public async Task When_ProcessResponseBodyWithUnknownInsertPlaceholder_Expect_RuleNotInvoked()
     {
         const string body = "The placeholder '{{insert:test:test-parameter}}' is unknown.";
+        
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeGeneratorRule("insert", "other-type"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
