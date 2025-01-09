@@ -1,42 +1,62 @@
 using EndpointForge.Abstractions.Exceptions;
+using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Extensions;
-using EndpointForge.WebApi.Tests.DataSources;
-using EndpointForge.WebApi.Tests.Fakes;
-using FluentAssertions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.IO;
+using Moq;
 
 namespace EndpointForge.WebApi.Tests.Extensions;
 
-
-
 public class EndpointRouteBuilderExtensionsTests
 {
+    private static readonly ILogger<EndpointForgeDataSource> StubLogger = new NullLogger<EndpointForgeDataSource>();
+    private static readonly Mock<IEndpointRouteBuilder> MockEndpointRouteBuilder = new();
+    
     [Fact]
-    public void When_UseEndpointForgeAndDataSourceIsFound_Expect_DataSourceAddedToDataSources()
+    public void UseEndpointForge_AddsDataSource_WhenServiceIsRegistered()
     {
-        var stubBuilder = new FakeEndpointRouteBuilder();
-        var stubRequestDelegateBuilder = new FakeRequestDelegateBuilder();
-        var stubLogger = new NullLogger<EndpointForgeDataSource>();
-        var dataSource = new EndpointForgeDataSource(stubLogger, stubRequestDelegateBuilder);
-        stubBuilder.ServiceProvider = new FakeServiceProvider(dataSource);
-        
-        stubBuilder.UseEndpointForge();
+        var mockMutableEndpointDataSource = new Mock<MutableEndpointDataSource>(StubLogger)
+            .As<IEndpointForgeDataSource>();
+        var mockDataSources = new Mock<ICollection<EndpointDataSource>>();
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        mockServiceProvider
+            .Setup(sp => sp.GetService(typeof(IEndpointForgeDataSource)))
+            .Returns(mockMutableEndpointDataSource.Object);
+        MockEndpointRouteBuilder.SetupGet(er => er.ServiceProvider)
+            .Returns(mockServiceProvider.Object);
+        MockEndpointRouteBuilder.SetupGet(er => er.DataSources)
+            .Returns(mockDataSources.Object);
 
-        stubBuilder.DataSources.Should().Contain(dataSource);
+        MockEndpointRouteBuilder.Object.UseEndpointForge();
+
+        Assert.Multiple(
+                () => mockServiceProvider.Verify(
+                    serviceProvider => serviceProvider.GetService(typeof(IEndpointForgeDataSource)),
+                    Times.Once),
+                () => mockDataSources.Verify(
+                    dataSources => dataSources.Add((EndpointDataSource) mockMutableEndpointDataSource.Object),
+                    Times.Once));
     }
 
     [Fact]
-    public void When_UseEndpointForgeAndDataSourceIsNotFound_Expect_ExceptionThrown()
+    public void UseEndpointForge_ThrowsException_WhenServiceIsNotRegistered()
     {
-        var stubBuilder = new FakeEndpointRouteBuilder
-        {
-            ServiceProvider = new FakeServiceProvider(null)
-        };
-        
-        stubBuilder.Invoking(builder => builder.UseEndpointForge())
-            .Should()
-            .ThrowExactly<DataSourceNotRegisteredEndpointForgeException>();
+        var mockDataSources = new Mock<ICollection<EndpointDataSource>>();
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        mockServiceProvider
+            .Setup(serviceProvider => serviceProvider.GetService(typeof(IEndpointForgeDataSource)))
+            .Returns<IEndpointForgeDataSource>(null!);
+        MockEndpointRouteBuilder.SetupGet(er => er.ServiceProvider)
+            .Returns(mockServiceProvider.Object);
+        MockEndpointRouteBuilder.SetupGet(er => er.DataSources)
+            .Returns(mockDataSources.Object);
+
+        Assert.Throws<DataSourceNotRegisteredEndpointForgeException>(
+            () => MockEndpointRouteBuilder.Object.UseEndpointForge());
+
+        mockServiceProvider.Verify(sp => sp.GetService(typeof(IEndpointForgeDataSource)), Times.Once);
+        mockDataSources.Verify(ds => ds.Add(It.IsAny<EndpointDataSource>()), Times.Never);
     }
 }

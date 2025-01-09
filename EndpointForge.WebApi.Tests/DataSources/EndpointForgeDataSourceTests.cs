@@ -1,22 +1,27 @@
-using System.Collections.Immutable;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.DataSources;
-using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.IO;
+using Moq;
 
 namespace EndpointForge.WebApi.Tests.DataSources;
 
 public class EndpointForgeDataSourceTests
 {
     private readonly ILogger<EndpointForgeDataSource> _stubLogger = new NullLogger<EndpointForgeDataSource>();
-    private readonly FakeRequestDelegateBuilder _stubRequestDelegateBuilder = new();
+    private readonly Mock<IRequestDelegateBuilder> _stubRequestDelegateBuilder = new();
 
+    public EndpointForgeDataSourceTests()
+    {
+        _stubRequestDelegateBuilder
+            .Setup(builder => builder.BuildResponse(
+                It.IsAny<EndpointResponseDetails>(), 
+                It.IsAny<List<EndpointForgeParameterDetails>>()))
+            .Returns(async _ => { await Task.CompletedTask; });
+    }
     
     [Fact]
     public void When_AddEndpointWithValidRoute_Expect_EndpointsContainsEndpointWithThatRoute()
@@ -27,13 +32,13 @@ public class EndpointForgeDataSourceTests
             Methods = ["GET"]
         };
 
-        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, _stubRequestDelegateBuilder);
+        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, _stubRequestDelegateBuilder.Object);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
 
-        var endpoint = (RouteEndpoint) endpointForgeDataSource.Endpoints.Single();
+        var endpoint = (RouteEndpoint)endpointForgeDataSource.Endpoints.Single();
         endpoint.RoutePattern.RawText.Should().Be(addEndpointRequest.Route);
     }
-    
+
     [Fact]
     public void When_AddEndpoint_Expect_EndpointAddedWithCorrectMethods()
     {
@@ -43,7 +48,7 @@ public class EndpointForgeDataSourceTests
             Methods = ["GET", "POST"]
         };
         
-        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, _stubRequestDelegateBuilder);
+        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, _stubRequestDelegateBuilder.Object);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
     
         var methodMetadata = endpointForgeDataSource
@@ -70,10 +75,11 @@ public class EndpointForgeDataSourceTests
                 Body = "Body"
             }
         };
-        var mockRequestDelegateBuilder = new FakeRequestDelegateBuilder();
-        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, mockRequestDelegateBuilder);
+        var endpointForgeDataSource = new EndpointForgeDataSource(_stubLogger, _stubRequestDelegateBuilder.Object);
         endpointForgeDataSource.AddEndpoint(addEndpointRequest);
         
-        mockRequestDelegateBuilder.HasBeenCalled.Should().BeTrue();
+        _stubRequestDelegateBuilder.Verify(builder => builder.BuildResponse(
+            addEndpointRequest.Response, 
+            new List<EndpointForgeParameterDetails>()));
     }
 }

@@ -1,24 +1,24 @@
 using System.Net;
 using EndpointForge.Abstractions.Exceptions;
+using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Managers;
-using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace EndpointForge.WebApi.Tests.Managers;
 
 public class EndpointForgeManagerTests
 {
-    private readonly FakeEndpointForgeDataSource _stubEndpointForgeDataSource;
+    private readonly Mock<IEndpointForgeDataSource> _mockEndpointForgeDataSource = new();
     private readonly EndpointForgeManager _endpointForgeManager;
-    
+
     public EndpointForgeManagerTests()
     {
         var stubLogger = NullLogger<EndpointForgeManager>.Instance;
-        _stubEndpointForgeDataSource = new FakeEndpointForgeDataSource();
-        _endpointForgeManager = new EndpointForgeManager(stubLogger, _stubEndpointForgeDataSource);
+        _endpointForgeManager = new EndpointForgeManager(stubLogger, _mockEndpointForgeDataSource.Object);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class EndpointForgeManagerTests
         var result = await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest);
 
         Assert.Multiple(
-            () => _stubEndpointForgeDataSource.AddedEndpoints.Should().ContainSingle(e => e == addEndpointRequest),
+            () => _mockEndpointForgeDataSource.Verify(dataSource => dataSource.AddEndpoint(addEndpointRequest, true)),
             () => result.Should().BeOfType<Created>());
     }
 

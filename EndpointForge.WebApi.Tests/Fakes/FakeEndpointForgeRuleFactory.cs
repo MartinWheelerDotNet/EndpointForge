@@ -4,6 +4,8 @@ using EndpointForge.Abstractions.Interfaces;
 namespace EndpointForge.WebApi.Tests.Fakes;
 
 [ExcludeFromCodeCoverage]
+// This fake is required as the method `GetRule` takes ReadOnlySpan<char> parameter and this 
+// cannot be mocked by moq as it is a struct reference
 internal class FakeEndpointForgeRuleFactory : IEndpointForgeRuleFactory
 {
     private readonly Dictionary<ReadOnlyMemory<char>, IEndpointForgeRule> _rules;
