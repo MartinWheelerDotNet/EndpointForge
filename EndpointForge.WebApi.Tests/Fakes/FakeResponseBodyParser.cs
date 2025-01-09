@@ -1,20 +1,20 @@
 using System.Diagnostics.CodeAnalysis;
 using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
 
-namespace EndpointForge.WebApi.Tests.Fakes;
-
-[ExcludeFromCodeCoverage]
-internal class FakeResponseBodyParser(string body) : IResponseBodyParser
+namespace EndpointForge.WebApi.Tests.Fakes
 {
-    public async Task ProcessResponseBody(
-        Stream stream, 
-        string responseBody, 
-        List<EndpointForgeParameterDetails> parameters)
+    [ExcludeFromCodeCoverage]
+    internal record FakeResponseBodyParser(string Body) : IResponseBodyParser
     {
-        stream.Seek(0, SeekOrigin.Begin);
-        var streamWriter = new StreamWriter(stream);
-        await streamWriter.WriteAsync(body);
-        await streamWriter.FlushAsync();
+        public async Task ProcessResponseBody(
+            Stream stream, 
+            string responseBody, 
+            Dictionary<string, string> parameters)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            await using var streamWriter = new StreamWriter(stream, leaveOpen: true);
+            await streamWriter.WriteAsync(Body);
+            await streamWriter.FlushAsync();
+        }
     }
 }

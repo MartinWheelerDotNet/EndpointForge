@@ -21,11 +21,11 @@ public class EndpointResponseDetailsExtensionsTests
     [Theory]
     [StringNullEmptyOrWhitespaceInlineData]
     [InlineData("text/test-type", true)]
-    public void When_HasContentTypeIsCalled(string? body, bool expectedResult)
+    public void When_HasContentTypeIsCalled(string? contentType, bool expectedResult)
     {
-        EndpointResponseDetails endpointResponseDetails = new() { Body = body };
+        EndpointResponseDetails endpointResponseDetails = new() { ContentType = contentType };
 
-        var result = endpointResponseDetails.HasBody();
+        var result = endpointResponseDetails.HasContentType();
 
         result.Should().Be(expectedResult);
     }

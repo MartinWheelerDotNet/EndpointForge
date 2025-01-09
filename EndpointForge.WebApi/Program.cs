@@ -48,7 +48,7 @@ internal class Program
     {
         logger.LogInformation("Add endpoint request received.");
         var addEndpointRequest = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
-
+        
         logger.LogInformation("Deserialized AddEndpointRequest.");
         return await endpointManager.TryAddEndpointAsync(addEndpointRequest);
     }

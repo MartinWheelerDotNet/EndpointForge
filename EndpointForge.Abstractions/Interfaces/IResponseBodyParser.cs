@@ -4,5 +4,5 @@ namespace EndpointForge.Abstractions.Interfaces;
 
 public interface IResponseBodyParser
 {
-    Task ProcessResponseBody(Stream stream, string responseBody, List<EndpointForgeParameterDetails> parameters);
+    Task ProcessResponseBody(Stream stream, string responseBody, Dictionary<string, string> parameters);
 }
