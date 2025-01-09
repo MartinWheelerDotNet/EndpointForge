@@ -2,8 +2,10 @@ using EndpointForge.Abstractions.Generators;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Managers;
 using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.WebApi.Builders;
 using EndpointForge.WebApi.Factories;
 using EndpointForge.WebApi.Parsers;
+using EndpointForge.WebApi.Processors;
 using EndpointForge.WebApi.Rules;
 using Microsoft.IO;
 
@@ -23,6 +25,8 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IEndpointForgeDataSource, EndpointForgeDataSource>()
             .AddSingleton<IEndpointForgeManager, EndpointForgeManager>()
             .AddSingleton<IResponseBodyParser, ResponseBodyParser>()
+            .AddSingleton<IRequestDelegateBuilder, RequestDelegateBuilder>()
+            .AddSingleton<IParameterProcessor, ParameterProcessor>()
             .AddSingleton<IEndpointForgeRuleFactory, EndpointForgeRuleFactory>();
 
     private static IServiceCollection AddGenerators(this IServiceCollection services) 

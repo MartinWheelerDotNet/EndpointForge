@@ -106,7 +106,9 @@ public class ResponseBodyParserTests
         await responseBodyParser.ProcessResponseBody(
             stream, 
             body, 
-            [new("static", "test-parameter", "parameter-value")]);
+            new Dictionary<string, string> {
+                { "test-parameter", "parameter-value" }
+            });
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -162,9 +164,9 @@ public class ResponseBodyParserTests
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeInsertRule("parameter"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new Dictionary<string, string>
         {
-            new("static", "test-parameter", "parameter-value")
+            { "test-parameter", "parameter-value" }
         };
         var stream = new MemoryStream();
         
@@ -184,9 +186,9 @@ public class ResponseBodyParserTests
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeInsertRule("parameter"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new Dictionary<string, string>
         {
-            new("static", "test-parameter", "parameter-value")
+            { "test-parameter", "parameter-value" }
         };
         var stream = new MemoryStream();
         
@@ -206,10 +208,10 @@ public class ResponseBodyParserTests
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeInsertRule("parameter"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new Dictionary<string, string>
         {
-            new("static", "test-parameter-1", "parameter-value-1"),
-            new("static", "test-parameter-2", "parameter-value-2")
+            { "test-parameter-1", "parameter-value-1" },
+            { "test-parameter-2", "parameter-value-2" }
         };
         var stream = new MemoryStream();
         
@@ -229,9 +231,9 @@ public class ResponseBodyParserTests
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeInsertRule("parameter"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new Dictionary<string, string>
         {
-            new("static", "test-parameter-2", "parameter-value-2")
+            { "test-parameter-2", "parameter-value-2" }
         };
         var stream = new MemoryStream();
         

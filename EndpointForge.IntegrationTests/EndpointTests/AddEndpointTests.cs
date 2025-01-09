@@ -438,5 +438,44 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         
          responseBody.Should().Be("test-value");
     }
+    
+        
+    [Fact]
+    public async Task When_ProvidingHeaderParameter_Expect_EndpointResponseBodyToContainThatHeaderValue()
+    {
+        const string headerValue = "test-header-value";
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-with-header-value",
+            Methods = new[]
+            {
+                "GET"
+            },
+            Response = new
+            {
+                StatusCode = 201,
+                ContentType = "text/test-type",
+                Body = "{{insert:parameter:test-header-parameter}}"
+            },
+            Parameters = new[]
+            {
+                new
+                {
+                    Type = "header",
+                    Identifier = "XCustom-Header",
+                    Value = "test-header-parameter"
+                    
+                }
+            }
+        };
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        httpClient.DefaultRequestHeaders.Add("XCustom-Header", headerValue);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        
+        responseBody.Should().Be("test-header-value");
+    }
     #endregion
 }

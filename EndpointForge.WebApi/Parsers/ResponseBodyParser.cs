@@ -10,21 +10,12 @@ public class ResponseBodyParser(
     public async Task ProcessResponseBody(
         Stream stream, 
         string responseBody, 
-        List<EndpointForgeParameterDetails> parameters)
+        Dictionary<string, string> parameters)
     {
         logger.LogInformation("Processing Response Body");
         var streamWriter = new StreamWriter(stream);
         var bodySpan = responseBody.AsSpan();
         var lastWrittenIndex = 0;
-
-        var processedParameters = new Dictionary<string, string>();
-        foreach (var parameter in parameters)
-        {
-            if (parameter.Type == "static")
-            {
-                processedParameters.Add(parameter.Identifier, parameter.Value);
-            }
-        }
 
         for (var readIndex = 0; readIndex < bodySpan.Length; readIndex++)
         {
@@ -46,7 +37,7 @@ public class ResponseBodyParser(
             readIndex++;
             var placeholderName = bodySpan[startOfPlaceholderNameIndex..readIndex];
 
-            if (!TryInvokeRule(streamWriter, placeholderName, processedParameters))
+            if (!TryInvokeRule(streamWriter, placeholderName, parameters))
             {
                 WritePlaceholder(streamWriter, placeholderName);
             }
