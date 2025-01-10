@@ -17,14 +17,13 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
         
         ConfigureDefaultServices(builder);
-        
+   
         var application = builder.Build();
 
         application.MapDefaultEndpoints();
         application.UseEndpointForge();
         application.UseMiddleware<ExceptionHandlingMiddleware>();
         
-
         if (application.Environment.IsDevelopment()) 
             application.MapOpenApi();
         
@@ -32,8 +31,15 @@ internal class Program
 
         application.MapPost(
             "/add-endpoint",
-            async (ILogger<Program> logger, IEndpointForgeManager endpointManager, HttpRequest httpRequest)
-                => await AddEndpoint(logger, httpRequest, endpointManager))
+            async (ILogger<Program> logger, IEndpointForgeManager endpointManager, HttpRequest httpRequest) => 
+            {
+                logger.LogInformation("Add endpoint request received.");
+                
+                var addEndpointRequest = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
+                
+                logger.LogInformation("Deserialized AddEndpointRequest.");
+                return await endpointManager.TryAddEndpointAsync(addEndpointRequest);
+            })
             .Accepts<AddEndpointRequest>(contentType: "application/json")
             .Produces<AddEndpointRequest>(StatusCodes.Status201Created)
             .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
@@ -42,17 +48,6 @@ internal class Program
 
         application.Run();
     }
-
-    #region Endpoint Methods
-    private static async Task<IResult> AddEndpoint(ILogger<Program> logger, HttpRequest httpRequest, IEndpointForgeManager endpointManager)
-    {
-        logger.LogInformation("Add endpoint request received.");
-        var addEndpointRequest = await httpRequest.TryDeserializeRequestAsync<AddEndpointRequest>();
-        
-        logger.LogInformation("Deserialized AddEndpointRequest.");
-        return await endpointManager.TryAddEndpointAsync(addEndpointRequest);
-    }
-    #endregion
 
     private static void ConfigureDefaultServices(WebApplicationBuilder builder)
     {

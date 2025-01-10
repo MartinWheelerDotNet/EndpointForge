@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using EndpointForge.IntegrationTests.Fixtures;
 using EndpointForge.Abstractions.Models;
 using FluentAssertions;
@@ -50,8 +52,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -78,8 +82,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -88,7 +94,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
     }
     
     [Fact]
-    public async Task When_CallingAddEndpointWithMSingleEmptyElement_Expect_UnprocessableEntityWithSingleError()
+    public async Task When_CallingAddEndpointWithSingleEmptyElement_Expect_UnprocessableEntityWithSingleError()
     {
         var addEndpointRequest = new
         {
@@ -101,12 +107,14 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request contains invalid JSON body which cannot be processed.",
             Errors = new[]
             {
-                "Endpoint request `methods` contains no entries"
+                "Endpoint request `methods` contains no entries."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -128,13 +136,15 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request contains invalid JSON body which cannot be processed.",
             Errors = new[]
             {
-                "Endpoint request `route` is empty or whitespace",
-                "Endpoint request `methods` contains no entries"
+                "Endpoint request `route` is empty or whitespace.",
+                "Endpoint request `methods` contains no entries."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -150,10 +160,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var addEndpointRequest = new
         {
             Route = "/test-endpoint-conflict",
-            Methods = new[]
-            {
-                "GET"
-            }
+            Methods = new[] { "GET" }
         };
         var expectedResponseBody = new
         {
@@ -164,9 +171,12 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
+
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
 
         Assert.Multiple(
@@ -189,8 +199,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var response = await httpClient.PostAsync(AddEndpointRoute, content);
         
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Created),
@@ -217,8 +229,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -240,8 +254,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -259,8 +275,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -282,8 +300,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-        
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.PostAsync(addEndpointRequest.Route, null);
 
         response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
@@ -302,8 +322,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var getResponse = await httpClient.GetAsync(addEndpointRequest.Route);
         var postResponse = await httpClient.PostAsync(addEndpointRequest.Route, null);
 
@@ -332,8 +354,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -360,8 +384,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
-        
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -389,8 +415,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -409,14 +437,11 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var addEndpointRequest = new
         {
             Route = "/test-endpoint-with-static-parameter",
-            Methods = new[]
-            {
-                "GET"
-            },
+            Methods = new[] { "GET" },
             Response = new
             {
-                StatusCode = 201,
-                ContentType = "text/test-type",
+                StatusCode = 200,
+                ContentType = "application/json",
                 Body = "{{insert:parameter:test-parameter}}"
             },
             Parameters = new[]
@@ -424,7 +449,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 new
                 {
                     Type = "static",
-                    Identifier = "test-parameter",
+                    Name = "test-parameter",
                     Value = "test-value"
                     
                 }
@@ -433,6 +458,10 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
 
         await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
         
@@ -447,10 +476,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var addEndpointRequest = new
         {
             Route = "/test-endpoint-with-header-value",
-            Methods = new[]
-            {
-                "GET"
-            },
+            Methods = new[] { "GET" },
             Response = new
             {
                 StatusCode = 201,
@@ -462,16 +488,17 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 new
                 {
                     Type = "header",
-                    Identifier = "XCustom-Header",
+                    Name = "XCustom-Header",
                     Value = "test-header-parameter"
-                    
                 }
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
         httpClient.DefaultRequestHeaders.Add("XCustom-Header", headerValue);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        await httpClient.PostAsync(AddEndpointRoute, content);
         var response = await httpClient.GetAsync(addEndpointRequest.Route);
         var responseBody = await response.Content.ReadAsStringAsync();
         

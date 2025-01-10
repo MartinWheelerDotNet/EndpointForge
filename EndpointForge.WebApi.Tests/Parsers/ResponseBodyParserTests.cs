@@ -22,7 +22,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -37,7 +37,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -52,7 +52,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -68,7 +68,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -85,7 +85,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -128,7 +128,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
@@ -146,7 +146,7 @@ public class ResponseBodyParserTests
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
-        await responseBodyParser.ProcessResponseBody(stream, body, new());
+        await responseBodyParser.ProcessResponseBody(stream, body, new Dictionary<string, string>());
         
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();

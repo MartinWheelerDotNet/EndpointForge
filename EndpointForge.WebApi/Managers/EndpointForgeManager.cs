@@ -2,23 +2,25 @@ using EndpointForge.Abstractions.Exceptions;
 using EndpointForge.WebApi.Extensions;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
+using FluentValidation;
 
 namespace EndpointForge.WebApi.Managers;
 
 public class EndpointForgeManager(
     ILogger<EndpointForgeManager> logger,
-    IEndpointForgeDataSource endpointForge) : IEndpointForgeManager
+    IEndpointForgeDataSource endpointForge,
+    IValidator<AddEndpointRequest> validator) : IEndpointForgeManager
 {
     private const string ConflictMessage = "The requested endpoint has already been added for {0} method";
-    private const string RouteMissingOrEmptyMessage = "Endpoint request `route` is empty or whitespace";
-    private const string MethodMissingOrEmptyMessage = "Endpoint request `methods` contains no entries";
-    
     private readonly List<EndpointRoutingDetails> _endpointDetails = [];
     private readonly Lock _listLock = new();
     
     public async Task<IResult> TryAddEndpointAsync(AddEndpointRequest addEndpointRequest)
     {
-        ValidateEndpointRequestOrThrow(addEndpointRequest);
+        var validationResult = await validator.ValidateAsync(addEndpointRequest);
+        if (!validationResult.IsValid)
+            throw new InvalidRequestBodyEndpointForgeException(
+                validationResult.Errors.Select(error => error.ErrorMessage));
 
         CreateEndpointOrThrow(addEndpointRequest);
         
@@ -26,20 +28,6 @@ public class EndpointForgeManager(
         
         await Task.CompletedTask;
         return TypedResults.Created(addEndpointRequest.Route);
-    }
-
-    private void ValidateEndpointRequestOrThrow(AddEndpointRequest addEndpointRequest) 
-    {
-        List<string> errors = [];
-        
-        if (string.IsNullOrWhiteSpace(addEndpointRequest.Route))
-            errors.Add(RouteMissingOrEmptyMessage);
-        if (addEndpointRequest.Methods.Count is 0)
-            errors.Add(MethodMissingOrEmptyMessage);
-        
-        if (errors.Count is not 0) throw new InvalidRequestBodyEndpointForgeException(errors);
-
-        logger.LogInformation("Successfully validated the add endpoint request.");
     }
 
     private void CreateEndpointOrThrow(AddEndpointRequest addEndpointRequest)

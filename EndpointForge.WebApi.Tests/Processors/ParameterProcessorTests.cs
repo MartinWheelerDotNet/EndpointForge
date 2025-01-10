@@ -30,15 +30,15 @@ public class ParameterProcessorTests
     {
         var parameters = new List<EndpointForgeParameterDetails>
         {
-            new("header", "XCustom-Header", "parameterName")
+            new("header", "XCustom-Header", "test-parameter-name")
         };
         var expectedParameterDictionary = new Dictionary<string, object>
         {
-            { "parameterName", "parameter-value" }
+            { "test-parameter-name", "test-parameter-value" }
         };
         var parameterProcessor = new ParameterProcessor();
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append("XCustom-Header", "parameter-value");
+        httpContext.Request.Headers.Append("XCustom-Header", "test-parameter-value");
         
         var processedParameterDictionary = parameterProcessor.Process(parameters, httpContext);
         

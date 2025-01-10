@@ -19,11 +19,16 @@ public class HttpRequestExtensionsTests
         AddEndpointRequest addEndpointRequest = new()
         {
             Route = "/test-route",
-            Methods = ["GET", "POST", "PUT", "DELETE"]
+            Methods = ["GET", "POST", "PUT", "DELETE"],
+            Response = {
+                StatusCode = 201,
+                Body = "test-body"
+            }
         };
+        
         var httpContext = new DefaultHttpContext();
         await WriteAsJsonAsync(httpContext.Request, addEndpointRequest);
-
+        
         var result = await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>();
 
         Assert.Multiple(
@@ -53,18 +58,22 @@ public class HttpRequestExtensionsTests
     }
 
     [Fact]
-    public async Task When_DeserializingRequestBodyAndBodyIsEmpty_Expect_BadRequestExceptionThrown()
+    public async Task When_DeserializingRequestBodyAndContentLengthIsZero_Expect_BadRequestException()
     {
-        var httpContext = new DefaultHttpContext();
+        var httpContext = new DefaultHttpContext
+        {
+            Request = { ContentLength = 0 }
+        };
 
         var exception = await Assert.ThrowsAsync<BadRequestEndpointForgeException>(
             async () => await httpContext.Request.TryDeserializeRequestAsync<AddEndpointRequest>());
-        
+
         Assert.Multiple(
             () => exception.StatusCode.Should().Be(HttpStatusCode.BadRequest),
             () => exception.Message
                 .Should()
-                .Be("Request body was of an unknown type, empty, or is missing required fields."));
+                .Be("Request body was of an unknown type, empty, or is missing required fields."),
+            () => exception.Errors.Should().BeEquivalentTo("Request body must not be empty."));
     }
 
     #endregion
@@ -72,12 +81,15 @@ public class HttpRequestExtensionsTests
     private static async Task WriteAsJsonAsync<T>(HttpRequest request, T data)
     {
         request.ContentType = "application/json";
-
+    
         var json = JsonSerializer.Serialize(data);
         var bytes = Encoding.UTF8.GetBytes(json);
 
         request.Body = new MemoryStream(bytes);
         await request.Body.FlushAsync();
         request.Body.Seek(0, SeekOrigin.Begin);
+        
+        request.ContentLength = bytes.Length;
+
     }
 }
