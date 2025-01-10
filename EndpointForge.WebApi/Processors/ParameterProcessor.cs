@@ -13,10 +13,10 @@ public class ParameterProcessor : IParameterProcessor
             switch (parameter.Type)
             {
                 case "static":
-                    processedParameters.Add(parameter.Identifier, parameter.Value);
+                    processedParameters.Add(parameter.Name, parameter.Value);
                     break;
                 case "header":
-                    if (context.Request.Headers.TryGetValue(parameter.Identifier, out var header))
+                    if (context.Request.Headers.TryGetValue(parameter.Name, out var header))
                         processedParameters.Add(parameter.Value, header.ToString());
                     break;
             }

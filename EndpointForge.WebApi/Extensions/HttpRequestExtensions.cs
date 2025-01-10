@@ -11,8 +11,11 @@ public static class HttpRequestExtensions
         PropertyNameCaseInsensitive = true
     };
     
-     public static async Task<T> TryDeserializeRequestAsync<T>(this HttpRequest request) where T : class
+     public static async Task<T> TryDeserializeRequestAsync<T>(
+         this HttpRequest request) where T : class
      {
+         if (request.ContentLength is null or 0)
+             throw new BadRequestEndpointForgeException(["Request body must not be empty."]);
          try
          {
              await using var stream = new MemoryStream((int) request.Headers.ContentLength.GetValueOrDefault() + 1024);
@@ -22,9 +25,9 @@ public static class HttpRequestExtensions
          
              var jsonSpan = new ReadOnlySpan<byte>(buffer, 0, bytesRead);
              var reader = new Utf8JsonReader(jsonSpan);
-    
-             var result = JsonSerializer.Deserialize<T>(ref reader, Options);
-             return result ?? throw new InvalidRequestBodyEndpointForgeException();
+
+             return JsonSerializer.Deserialize<T>(ref reader, Options)
+                    ?? throw new InvalidRequestBodyEndpointForgeException();
          }
          catch (Exception exception)
          {

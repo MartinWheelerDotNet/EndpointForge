@@ -1,5 +1,3 @@
-using EndpointForge.Abstractions.Models;
-
 namespace EndpointForge.Abstractions.Interfaces;
 
 public interface IResponseBodyParser

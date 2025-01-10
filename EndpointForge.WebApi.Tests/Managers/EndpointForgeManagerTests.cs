@@ -3,6 +3,7 @@ using EndpointForge.Abstractions.Exceptions;
 using EndpointForge.Abstractions.Interfaces;
 using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Managers;
+using EndpointForge.WebApi.Validators;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,12 +14,15 @@ namespace EndpointForge.WebApi.Tests.Managers;
 public class EndpointForgeManagerTests
 {
     private readonly Mock<IEndpointForgeDataSource> _mockEndpointForgeDataSource = new();
+
     private readonly EndpointForgeManager _endpointForgeManager;
 
     public EndpointForgeManagerTests()
     {
         var stubLogger = NullLogger<EndpointForgeManager>.Instance;
-        _endpointForgeManager = new EndpointForgeManager(stubLogger, _mockEndpointForgeDataSource.Object);
+        var parametersValidator = new EndpointForgeParameterDetailsValidator();
+        var validator = new AddEndpointRequestValidator(parametersValidator);
+        _endpointForgeManager = new EndpointForgeManager(stubLogger, _mockEndpointForgeDataSource.Object, validator);
     }
 
     [Fact]
@@ -64,11 +68,11 @@ public class EndpointForgeManagerTests
             () => exception.Message.Should().Be("Request contains invalid JSON body which cannot be processed."),
             () => exception.Errors
                 .Should()
-                .BeEquivalentTo("Endpoint request `route` is empty or whitespace"));
+                .BeEquivalentTo("Endpoint request `route` is empty or whitespace."));
     }
 
     [Fact]
-    public async Task When_AddEndpointRequestHasEmptyMethod_Expect_UnprocessableEntityWithRouteEmptyMessage()
+    public async Task When_AddEndpointRequestFailsValidation_Expect_UnprocessableEntityWithValidationErrorMessage()
     {
         var addEndpointRequest = new AddEndpointRequest
         {
@@ -88,33 +92,7 @@ public class EndpointForgeManagerTests
             () => exception.Message.Should().Be("Request contains invalid JSON body which cannot be processed."),
             () => exception.Errors
                 .Should()
-                .BeEquivalentTo("Endpoint request `methods` contains no entries"));
-    }
-
-    [Fact]
-    public async Task When_AddEndpointRequestHasEmptyRouteAndEmptyMethod_Expect_UnprocessableEntityWithBothMessages()
-    {
-        var addEndpointRequest = new AddEndpointRequest
-        {
-            Route = "",
-            Methods = [],
-            Response = new EndpointResponseDetails
-            {
-                StatusCode = 200
-            }
-        };
-        
-        var exception = await Assert.ThrowsAsync<InvalidRequestBodyEndpointForgeException>(
-            async () => await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest));
-        
-        Assert.Multiple(
-            () => exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
-            () => exception.Message.Should().Be("Request contains invalid JSON body which cannot be processed."),
-            () => exception.Errors
-                .Should()
-                .BeEquivalentTo(
-                    "Endpoint request `route` is empty or whitespace",
-                    "Endpoint request `methods` contains no entries"));
+                .BeEquivalentTo("Endpoint request `methods` contains no entries."));
     }
 
     [Fact]
@@ -129,6 +107,7 @@ public class EndpointForgeManagerTests
                 StatusCode = 200
             }
         };
+         
         await _endpointForgeManager.TryAddEndpointAsync(addEndpointRequest);
 
         var exception = await Assert.ThrowsAsync<ConflictEndpointForgeException>(

@@ -134,13 +134,13 @@ public class RequestDelegateBuilderTests
         {
             StatusCode = 201,
             Body = "test-body",
-            ContentType = "application/json",
+            ContentType = "application/json"
         };
         var parameters = new List<EndpointForgeParameterDetails>
         {
-            new("static", "test-parameter", "test-parameter-value"),
+            new("insert", "test-parameter", "test-parameter-value")
         };
-        var expectedParameterDictionary = new Dictionary<string, string>()
+        var expectedParameterDictionary = new Dictionary<string, string>
         {
             { "test-parameter", "test-parameter-value" }
         };
