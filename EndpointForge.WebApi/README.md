@@ -59,7 +59,7 @@ To run the project as HTTP only, navigate to the project root and run the follow
   dotnet run
 ```
 
-To run the project as HTTPS, then run the following:
+To run the project as HTTPS, instead run the following:
 
 ```shell
   dotnet run --launchProfile https
