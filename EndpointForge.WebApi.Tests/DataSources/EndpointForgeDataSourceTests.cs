@@ -1,5 +1,5 @@
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Abstractions;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.DataSources;
 using FluentAssertions;
 using Microsoft.AspNetCore.Routing;
@@ -19,7 +19,7 @@ public class EndpointForgeDataSourceTests
         _stubRequestDelegateBuilder
             .Setup(builder => builder.BuildResponse(
                 It.IsAny<EndpointResponseDetails>(), 
-                It.IsAny<List<EndpointForgeParameterDetails>>()))
+                It.IsAny<List<EndpointParameterDetails>>()))
             .Returns(async _ => { await Task.CompletedTask; });
     }
     
@@ -80,6 +80,6 @@ public class EndpointForgeDataSourceTests
         
         _stubRequestDelegateBuilder.Verify(builder => builder.BuildResponse(
             addEndpointRequest.Response, 
-            new List<EndpointForgeParameterDetails>()));
+            new List<EndpointParameterDetails>()));
     }
 }

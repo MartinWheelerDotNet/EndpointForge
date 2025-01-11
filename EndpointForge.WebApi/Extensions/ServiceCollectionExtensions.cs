@@ -1,16 +1,15 @@
-using EndpointForge.Abstractions.Generators;
+using EndpointForge.Core.Abstractions;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Managers;
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
 using EndpointForge.WebApi.Builders;
 using EndpointForge.WebApi.Factories;
+using EndpointForge.WebApi.Generators;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Processors;
 using EndpointForge.WebApi.Rules;
 using EndpointForge.WebApi.Validators;
 using FluentValidation;
-using Microsoft.IO;
 
 namespace EndpointForge.WebApi.Extensions;
 
@@ -45,5 +44,5 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddValidators(this IServiceCollection services)
         => services
             .AddTransient<IValidator<AddEndpointRequest>, AddEndpointRequestValidator>()
-            .AddTransient<IValidator<EndpointForgeParameterDetails>, EndpointForgeParameterDetailsValidator>();
+            .AddTransient<IValidator<EndpointParameterDetails>, EndpointParameterDetailsValidator>();
 }

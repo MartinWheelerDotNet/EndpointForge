@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Models;
 
 namespace EndpointForge.WebApi.Extensions;
 

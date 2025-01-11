@@ -1,6 +1,5 @@
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
-using Microsoft.AspNetCore.Routing.Patterns;
+using EndpointForge.Core.Abstractions;
+using EndpointForge.Core.Models;
 
 namespace EndpointForge.WebApi.DataSources;
 

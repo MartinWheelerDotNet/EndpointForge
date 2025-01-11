@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.Tests.Attributes;
 using EndpointForge.WebApi.Validators;
 using FluentAssertions;
@@ -6,7 +6,7 @@ using FluentValidation.TestHelper;
 
 namespace EndpointForge.WebApi.Tests.Validators;
 
-// Its recommend to supply a real validator instance instead of mocking, and supply it with bad data.
+// Its recommend to supply a real validator instance instead of mocking, and supply it with bad data if required.
 // https://docs.fluentvalidation.net/en/latest/testing.html#mocking
 public class AddEndpointRequestValidatorTests
     {
@@ -14,7 +14,7 @@ public class AddEndpointRequestValidatorTests
 
         public AddEndpointRequestValidatorTests()
         {
-            var parameterValidator = new EndpointForgeParameterDetailsValidator();
+            var parameterValidator = new EndpointParameterDetailsValidator();
             _endpointRequestValidator = new AddEndpointRequestValidator(parameterValidator);
         }
 
@@ -112,7 +112,7 @@ public class AddEndpointRequestValidatorTests
         [Fact]
         public void When_ParametersAreValid_Expect_NoValidationError()
         {
-            var validParameter = new EndpointForgeParameterDetails("static", "test-parameter-name", "test-value");
+            var validParameter = new EndpointParameterDetails("static", "test-parameter-name", "test-value");
             
             var model = new AddEndpointRequest
             {
@@ -129,7 +129,7 @@ public class AddEndpointRequestValidatorTests
         [Fact]
         public void When_ParametersAreInvalid_Expect_ValidationError()
         {
-            var invalidParameter = new EndpointForgeParameterDetails("invalid-type", "", "");
+            var invalidParameter = new EndpointParameterDetails("invalid-type", "", "");
 
             var model = new AddEndpointRequest
             {

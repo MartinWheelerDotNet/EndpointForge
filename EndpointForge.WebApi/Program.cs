@@ -1,8 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using EndpointForge.Core.Abstractions;
 using EndpointForge.WebApi.Extensions;
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Models;
 using EndpointForge.ServiceDefaults;
 using EndpointForge.WebApi.Middleware;
 using Microsoft.AspNetCore.Http.Json;

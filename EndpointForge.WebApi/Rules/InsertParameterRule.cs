@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Core.Abstractions;
 
 namespace EndpointForge.WebApi.Rules;
 

@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.Processors;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +10,7 @@ public class ParameterProcessorTests
     [Fact]
     public void When_ProcessWithStaticParameter_Expect_ParameterMappedInDictionary()
     {
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new List<EndpointParameterDetails>
         {
             new("static", "identifier", "parameter-value")
         };
@@ -28,7 +28,7 @@ public class ParameterProcessorTests
     [Fact]
     public void When_ProcessWithHeaderParameter_Expect_ParameterMappedFromHeadersInToDictionary()
     {
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new List<EndpointParameterDetails>
         {
             new("header", "XCustom-Header", "test-parameter-name")
         };

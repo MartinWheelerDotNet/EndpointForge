@@ -1,5 +1,5 @@
-using EndpointForge.Abstractions.Exceptions;
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Core.Abstractions;
+using EndpointForge.Core.Exceptions;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Extensions;
 using Microsoft.AspNetCore.Routing;
