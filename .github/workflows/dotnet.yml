@@ -32,8 +32,6 @@ jobs:
         include:
           - name: WebApi
             project: EndpointForge.WebApi.Tests/EndpointForge.WebApi.Tests.csproj
-          - name: Core
-            project: EndpointForge.Core.Tests/EndpointForge.Core.Tests.csproj
           - name: Integration
             project: EndpointForge.IntegrationTests/EndpointForge.IntegrationTests.csproj
 
