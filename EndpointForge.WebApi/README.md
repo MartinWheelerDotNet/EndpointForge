@@ -5,6 +5,10 @@ creation, and management of EndpointForge dynamic endpoints, whilst keeping memo
 
 This project will also serve as the host server for all EndpointForge APIs created.
 
+This document covers building this project as a standalone service.
+for more details about building and running as part of the Aspire service. please see the 
+[Aspire AppHost Documentation](../EndpointForge.AppHost/README.md#running) in the `EndpointForge.AppHost` project for more details.
+
 ## Requirements
 
 - .NET 9.0.0 or above.
@@ -41,12 +45,6 @@ project.
 
 ## Building
 
-This section documents building this project as a standalone service, for more details about building and running as 
-part of the Aspire service. 
-Please see the [Aspire AppHost Documentation](../EndpointForge.AppHost/README.md#running) in the `EndpointForge.AppHost` project for more details.
-
-### Building the project
-
 Navigate to the project root and run the following command:
 
 ```shell
@@ -54,12 +52,6 @@ Navigate to the project root and run the following command:
 ```
 
 ## Running
-
-This section documents running this project as a standalone service, for more details about building and running as
-part of the Aspire service.
-Please see the [Aspire AppHost Documentation](../EndpointForge.AppHost/README.md#running) in the `EndpointForge.AppHost` project for more details.
-
-### Running the project
 
 To run the project as HTTP only, navigate to the project root and run the following command:
 
