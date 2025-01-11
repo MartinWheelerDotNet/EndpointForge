@@ -1,7 +1,7 @@
-using EndpointForge.Abstractions.Generators;
+using EndpointForge.WebApi.Generators;
 using FluentAssertions;
 
-namespace EndpointForge.Abstractions.Tests.Generators;
+namespace EndpointForge.WebApi.Tests.Generators;
 
 public class GuidGeneratorTests
 {
