@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using EndpointForge.Core.Models;
 using EndpointForge.IntegrationTests.Fixtures;
+using EndpointForge.Models;
 using FluentAssertions;
 
 namespace EndpointForge.IntegrationTests.EndpointTests;
@@ -47,7 +47,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request body was of an unknown type, empty, or is missing required fields.",
             Errors = new []
             {
-                "JSON deserialization for type 'EndpointForge.Core.Models.AddEndpointRequest' " +
+                "JSON deserialization for type 'EndpointForge.Models.AddEndpointRequest' " +
                 "was missing required properties including: 'Route'."
             }
         };
@@ -76,7 +76,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request body was of an unknown type, empty, or is missing required fields.",
             Errors = new[]
             {
-                "JSON deserialization for type 'EndpointForge.Core.Models.AddEndpointRequest' " +
+                "JSON deserialization for type 'EndpointForge.Models.AddEndpointRequest' " +
                 "was missing required properties including: 'Methods'."
                 
             }

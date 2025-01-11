@@ -1,7 +1,7 @@
 using System.Net.Mime;
-using EndpointForge.Core.Abstractions;
-using EndpointForge.Core.Extensions;
-using EndpointForge.Core.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Extensions;
 
 namespace EndpointForge.WebApi.Builders;
 

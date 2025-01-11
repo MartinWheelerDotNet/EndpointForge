@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using EndpointForge.Core.Abstractions;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
 using EndpointForge.WebApi.Extensions;
-using EndpointForge.Core.Models;
 using EndpointForge.ServiceDefaults;
 using EndpointForge.WebApi.Middleware;
 using Microsoft.AspNetCore.Http.Json;

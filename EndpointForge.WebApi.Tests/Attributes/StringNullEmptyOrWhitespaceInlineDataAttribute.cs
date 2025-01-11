@@ -1,8 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Xunit.Sdk;
 
-namespace EndpointForge.Core.Tests.Attributes;
+namespace EndpointForge.WebApi.Tests.Attributes;
 
 [ExcludeFromCodeCoverage]
 public class StringNullEmptyOrWhitespaceInlineDataAttribute : DataAttribute

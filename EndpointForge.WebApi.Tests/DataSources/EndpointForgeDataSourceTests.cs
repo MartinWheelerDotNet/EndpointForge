@@ -1,10 +1,7 @@
-using EndpointForge.Core.Abstractions;
-using EndpointForge.Core.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
 using EndpointForge.WebApi.DataSources;
 using FluentAssertions;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace EndpointForge.WebApi.Tests.DataSources;

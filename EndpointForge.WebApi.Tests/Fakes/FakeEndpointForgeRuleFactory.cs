@@ -1,5 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-using EndpointForge.Core.Abstractions;
+using EndpointForge.Abstractions;
 
 namespace EndpointForge.WebApi.Tests.Fakes;
 

@@ -1,10 +1,7 @@
-using EndpointForge.Core.Abstractions;
-using EndpointForge.Core.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
 using EndpointForge.WebApi.Builders;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IO;
 using Moq;
 

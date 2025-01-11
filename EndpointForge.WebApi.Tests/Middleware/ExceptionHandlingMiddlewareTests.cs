@@ -1,12 +1,7 @@
-using System.Net;
-using System.Text.Json;
-using EndpointForge.Core.Exceptions;
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Middleware;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EndpointForge.WebApi.Tests.Middleware;
 

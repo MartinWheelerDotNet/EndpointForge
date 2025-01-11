@@ -1,7 +1,6 @@
-using EndpointForge.Core.Models;
-using Microsoft.AspNetCore.Http;
+using EndpointForge.Models;
 
-namespace EndpointForge.Core.Abstractions;
+namespace EndpointForge.Abstractions;
 
 public interface IEndpointForgeManager
 {

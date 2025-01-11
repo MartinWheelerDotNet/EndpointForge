@@ -1,4 +1,4 @@
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
 using FluentValidation;
 
 namespace EndpointForge.WebApi.Validators;

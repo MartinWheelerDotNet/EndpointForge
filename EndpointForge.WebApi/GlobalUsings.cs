@@ -1,5 +1,6 @@
 // Global using directives
 
+global using System.Buffers;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Net;
 global using System.Text.Json;

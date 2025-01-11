@@ -1,4 +1,4 @@
-namespace EndpointForge.Core.Models;
+namespace EndpointForge.Models;
 
 public record AddEndpointRequest
 {

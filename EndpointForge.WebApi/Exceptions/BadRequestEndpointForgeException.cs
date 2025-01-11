@@ -1,4 +1,4 @@
-namespace EndpointForge.Core.Exceptions;
+namespace EndpointForge.WebApi.Exceptions;
 
 public class BadRequestEndpointForgeException(IEnumerable<string>? errors) : EndpointForgeException(
     HttpStatusCode.BadRequest, 

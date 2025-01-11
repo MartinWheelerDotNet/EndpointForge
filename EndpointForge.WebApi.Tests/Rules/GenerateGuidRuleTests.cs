@@ -1,4 +1,4 @@
-using EndpointForge.Core.Abstractions;
+using EndpointForge.Abstractions;
 using EndpointForge.WebApi.Rules;
 using FluentAssertions;
 using Moq;
