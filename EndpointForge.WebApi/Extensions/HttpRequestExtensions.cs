@@ -1,5 +1,4 @@
-using System.Text.Json;
-using EndpointForge.Abstractions.Exceptions;
+using EndpointForge.Core.Exceptions;
 
 namespace EndpointForge.WebApi.Extensions;
 

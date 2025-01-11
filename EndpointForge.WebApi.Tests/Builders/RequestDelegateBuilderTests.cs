@@ -1,5 +1,5 @@
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Abstractions;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.Builders;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -136,7 +136,7 @@ public class RequestDelegateBuilderTests
             Body = "test-body",
             ContentType = "application/json"
         };
-        var parameters = new List<EndpointForgeParameterDetails>
+        var parameters = new List<EndpointParameterDetails>
         {
             new("insert", "test-parameter", "test-parameter-value")
         };

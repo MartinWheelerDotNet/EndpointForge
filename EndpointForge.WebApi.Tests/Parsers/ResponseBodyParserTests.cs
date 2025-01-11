@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Core.Abstractions;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;

@@ -1,5 +1,5 @@
-using EndpointForge.Abstractions.Exceptions;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Core.Exceptions;
+using EndpointForge.Core.Models;
 using EndpointForge.WebApi.Extensions;
 
 namespace EndpointForge.WebApi.Middleware;
