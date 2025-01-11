@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
-using EndpointForge.Abstractions.Exceptions;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Middleware;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;

@@ -1,12 +1,11 @@
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Models;
 using FluentValidation;
-using Microsoft.AspNetCore.Routing.Patterns;
 
 namespace EndpointForge.WebApi.Validators;
 
 public class AddEndpointRequestValidator : AbstractValidator<AddEndpointRequest>
 {
-    public AddEndpointRequestValidator(IValidator<EndpointForgeParameterDetails> endpointForgeParameterDetailsValidator)
+    public AddEndpointRequestValidator(IValidator<EndpointParameterDetails> endpointForgeParameterDetailsValidator)
     {
         RuleFor(x => x.Route)
             .NotEmpty()

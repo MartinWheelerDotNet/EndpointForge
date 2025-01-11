@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
-using EndpointForge.Abstractions.Exceptions;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Extensions;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +16,7 @@ public class HttpRequestExtensionsTests
     [Fact]
     public async Task When_DeserializingRequestBodyAndBodyIsValid_Expect_Deserialized()
     {
-        AddEndpointRequest addEndpointRequest = new()
+        var addEndpointRequest = new AddEndpointRequest
         {
             Route = "/test-route",
             Methods = ["GET", "POST", "PUT", "DELETE"],

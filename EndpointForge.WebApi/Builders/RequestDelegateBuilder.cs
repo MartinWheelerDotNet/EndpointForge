@@ -1,8 +1,8 @@
+
 using System.Net.Mime;
-using EndpointForge.Abstractions.Extensions;
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
-using Microsoft.IO;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Extensions;
 
 namespace EndpointForge.WebApi.Builders;
 
@@ -14,7 +14,7 @@ public class RequestDelegateBuilder(
 {
     public RequestDelegate BuildResponse(
         EndpointResponseDetails responseDetails,
-        List<EndpointForgeParameterDetails> parameters)
+        List<EndpointParameterDetails> parameters)
     {
         return async context =>
         {
@@ -42,8 +42,9 @@ public class RequestDelegateBuilder(
     private static string? GetContentType(EndpointResponseDetails responseDetails)
         => (responseDetails.HasBody(), responseDetails.HasContentType()) switch
         {
-            (false, _) => null,
             (true, false) => MediaTypeNames.Text.Plain,
-            (true, true) => responseDetails.ContentType
+            (true, true) => responseDetails.ContentType,
+            _ => null
         };
+    
 }

@@ -1,11 +1,11 @@
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
 
 namespace EndpointForge.WebApi.Processors;
 
 public class ParameterProcessor : IParameterProcessor
 {
-    public Dictionary<string, string> Process(List<EndpointForgeParameterDetails> parameters, HttpContext context)
+    public Dictionary<string, string> Process(List<EndpointParameterDetails> parameters, HttpContext context)
     {
         var processedParameters = new Dictionary<string, string>();
         foreach (var parameter in parameters)

@@ -1,7 +1,7 @@
-using EndpointForge.Abstractions.Exceptions;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Extensions;
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
 using FluentValidation;
 
 namespace EndpointForge.WebApi.Managers;

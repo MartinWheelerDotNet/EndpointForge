@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions;
 using EndpointForge.WebApi.Factories;
 using FluentAssertions;
 using Moq;

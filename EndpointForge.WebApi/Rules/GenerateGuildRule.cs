@@ -1,5 +1,5 @@
 using System.Buffers;
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions;
 
 namespace EndpointForge.WebApi.Rules;
 

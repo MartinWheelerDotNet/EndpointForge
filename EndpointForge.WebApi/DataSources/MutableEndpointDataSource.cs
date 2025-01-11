@@ -1,7 +1,3 @@
-
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Primitives;
-
 namespace EndpointForge.WebApi.DataSources;
 
 public abstract class MutableEndpointDataSource : EndpointDataSource

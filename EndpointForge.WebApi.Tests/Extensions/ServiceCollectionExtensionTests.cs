@@ -1,4 +1,4 @@
-using EndpointForge.Abstractions.Interfaces;
+using EndpointForge.Abstractions;
 using EndpointForge.WebApi.DataSources;
 using EndpointForge.WebApi.Extensions;
 using EndpointForge.WebApi.Generators;

@@ -1,7 +1,7 @@
 using System.Net;
-using EndpointForge.Abstractions.Exceptions;
-using EndpointForge.Abstractions.Interfaces;
-using EndpointForge.Abstractions.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Managers;
 using EndpointForge.WebApi.Validators;
 using FluentAssertions;
@@ -20,7 +20,7 @@ public class EndpointForgeManagerTests
     public EndpointForgeManagerTests()
     {
         var stubLogger = NullLogger<EndpointForgeManager>.Instance;
-        var parametersValidator = new EndpointForgeParameterDetailsValidator();
+        var parametersValidator = new EndpointParameterDetailsValidator();
         var validator = new AddEndpointRequestValidator(parametersValidator);
         _endpointForgeManager = new EndpointForgeManager(stubLogger, _mockEndpointForgeDataSource.Object, validator);
     }
