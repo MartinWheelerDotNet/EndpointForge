@@ -1,12 +1,10 @@
-using System.Net;
-using EndpointForge.Core.Abstractions;
-using EndpointForge.Core.Exceptions;
-using EndpointForge.Core.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
+using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Managers;
 using EndpointForge.WebApi.Validators;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace EndpointForge.WebApi.Tests.Managers;

@@ -1,4 +1,4 @@
-namespace EndpointForge.Core.Abstractions;
+namespace EndpointForge.Abstractions;
 
 public interface IEndpointForgeRule
 {

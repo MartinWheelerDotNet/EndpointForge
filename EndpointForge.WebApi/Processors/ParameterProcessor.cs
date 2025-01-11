@@ -1,5 +1,5 @@
-using EndpointForge.Core.Abstractions;
-using EndpointForge.Core.Models;
+using EndpointForge.Abstractions;
+using EndpointForge.Models;
 
 namespace EndpointForge.WebApi.Processors;
 

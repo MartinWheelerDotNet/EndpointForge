@@ -1,4 +1,4 @@
-namespace EndpointForge.Core.Exceptions;
+namespace EndpointForge.WebApi.Exceptions;
 
 public class InvalidRequestBodyEndpointForgeException(IEnumerable<string>? errors = null) : EndpointForgeException(
     HttpStatusCode.UnprocessableEntity, 

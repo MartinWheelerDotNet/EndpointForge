@@ -1,6 +1,6 @@
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
 
-namespace EndpointForge.Core.Extensions;
+namespace EndpointForge.WebApi.Extensions;
 
 public static class EndpointResponseDetailsExtensions
 {

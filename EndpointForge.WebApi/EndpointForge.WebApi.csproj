@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EndpointForge.Core\EndpointForge.Core.csproj" />
+      <ProjectReference Include="..\EndpointForge.Abstractions\EndpointForge.Abstractions.csproj" />
       <ProjectReference Include="..\EndpointForge.ServiceDefaults\EndpointForge.ServiceDefaults.csproj" />
     </ItemGroup>
 

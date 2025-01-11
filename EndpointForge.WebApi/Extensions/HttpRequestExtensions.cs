@@ -1,4 +1,4 @@
-using EndpointForge.Core.Exceptions;
+using EndpointForge.WebApi.Exceptions;
 
 namespace EndpointForge.WebApi.Extensions;
 

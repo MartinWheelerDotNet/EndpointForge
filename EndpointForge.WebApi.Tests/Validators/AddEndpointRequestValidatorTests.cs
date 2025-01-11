@@ -1,4 +1,4 @@
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
 using EndpointForge.WebApi.Tests.Attributes;
 using EndpointForge.WebApi.Validators;
 using FluentAssertions;

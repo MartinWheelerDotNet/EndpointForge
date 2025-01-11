@@ -1,4 +1,4 @@
-using EndpointForge.Core.Abstractions;
+using EndpointForge.Abstractions;
 
 namespace EndpointForge.WebApi.Factories;
 

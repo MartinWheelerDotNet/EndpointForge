@@ -1,9 +1,7 @@
-using EndpointForge.Core.Abstractions;
+using EndpointForge.Abstractions;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace EndpointForge.WebApi.Tests.Parsers;

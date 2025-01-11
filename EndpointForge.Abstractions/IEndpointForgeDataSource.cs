@@ -1,6 +1,6 @@
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
 
-namespace EndpointForge.Core.Abstractions;
+namespace EndpointForge.Abstractions;
 
 public interface IEndpointForgeDataSource
 {

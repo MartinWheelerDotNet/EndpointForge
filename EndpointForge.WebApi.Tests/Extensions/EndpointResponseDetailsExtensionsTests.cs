@@ -1,9 +1,9 @@
-﻿using EndpointForge.Core.Extensions;
-using EndpointForge.Core.Models;
-using EndpointForge.Core.Tests.Attributes;
+﻿using EndpointForge.Models;
+using EndpointForge.WebApi.Extensions;
+using EndpointForge.WebApi.Tests.Attributes;
 using FluentAssertions;
 
-namespace EndpointForge.Core.Tests.Extensions;
+namespace EndpointForge.WebApi.Tests.Extensions;
 
 public class EndpointResponseDetailsExtensionsTests
 {

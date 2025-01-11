@@ -1,7 +1,6 @@
-using EndpointForge.Core.Models;
+using EndpointForge.Models;
 using EndpointForge.WebApi.Processors;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 
 namespace EndpointForge.WebApi.Tests.Processors;
 
