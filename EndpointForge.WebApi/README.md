@@ -6,7 +6,7 @@ creation, and management of EndpointForge dynamic endpoints, whilst keeping memo
 This project will also serve as the host server for all EndpointForge APIs created.
 
 This document covers building this project as a standalone service.
-for more details about building and running as part of the Aspire service. please see the 
+For more details about building and running as part of the .NET Aspire service, please see the 
 [Aspire AppHost Documentation](../EndpointForge.AppHost/README.md#running) in the `EndpointForge.AppHost` project for more details.
 
 ## Requirements
