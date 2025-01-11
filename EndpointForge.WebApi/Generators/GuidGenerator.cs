@@ -1,6 +1,6 @@
 using EndpointForge.Abstractions.Interfaces;
 
-namespace EndpointForge.Abstractions.Generators;
+namespace EndpointForge.WebApi.Generators;
 
 public class GuidGenerator : IGuidGenerator
 {
