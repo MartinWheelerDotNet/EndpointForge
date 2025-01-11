@@ -14,7 +14,7 @@ For more details about building and running as part of the .NET Aspire service, 
 - .NET 9.0.0 or above.
 - Development certificates present on the local machine for HTTPS connections.
 
-To install .NET 9 please see the [Install .NET](https://learn.microsoft.com/en-us/dotnet/core/install/) documentation from Microsoft.
+To install .NET 9 please see the [Install .NET Documentation](https://learn.microsoft.com/en-us/dotnet/core/install/) from Microsoft.
 
 To use HTTPS connections when running locally you will need to have local trusted development certificates present.
 These can be created and trusted by running the following command:
