@@ -41,7 +41,7 @@ internal class Program
                 return await endpointManager.TryAddEndpointAsync(addEndpointRequest);
             })
             .Accepts<AddEndpointRequest>(contentType: "application/json")
-            .Produces<AddEndpointRequest>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status201Created)
             .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status409Conflict)
             .Produces<ErrorResponse>(StatusCodes.Status422UnprocessableEntity);

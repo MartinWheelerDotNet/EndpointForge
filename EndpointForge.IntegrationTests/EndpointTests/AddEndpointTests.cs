@@ -468,7 +468,6 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
          responseBody.Should().Be("test-value");
     }
     
-        
     [Fact]
     public async Task When_ProvidingHeaderParameter_Expect_EndpointResponseBodyToContainThatHeaderValue()
     {
