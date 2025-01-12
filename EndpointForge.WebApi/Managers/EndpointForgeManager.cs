@@ -12,7 +12,7 @@ public class EndpointForgeManager(
     IValidator<AddEndpointRequest> validator) : IEndpointForgeManager
 {
     private const string ConflictMessage = "The requested endpoint has already been added for {0} method";
-    private readonly List<EndpointRoutingDetails> _endpointDetails = [];
+    private readonly List<(string Route, string Method)> _endpointDetails = [];
     private readonly Lock _listLock = new();
     
     public async Task<IResult> TryAddEndpointAsync(AddEndpointRequest addEndpointRequest)
