@@ -14,7 +14,7 @@ public class EndpointRouteBuilderExtensionsTests
     [Fact]
     public void UseEndpointForge_AddsDataSource_WhenServiceIsRegistered()
     {
-        var mockMutableEndpointDataSource = new Mock<MutableEndpointDataSource>(StubLogger)
+        var mockMutableEndpointDataSource = new Mock<DynamicEndpointDataSource>(StubLogger)
             .As<IEndpointForgeDataSource>();
         var mockDataSources = new Mock<ICollection<EndpointDataSource>>();
         var mockServiceProvider = new Mock<IServiceProvider>();

@@ -5,7 +5,7 @@ namespace EndpointForge.WebApi.DataSources;
 
 public class EndpointForgeDataSource(
     ILogger<EndpointForgeDataSource> logger,
-    IRequestDelegateBuilder requestDelegateBuilder) : MutableEndpointDataSource(logger), IEndpointForgeDataSource
+    IRequestDelegateBuilder requestDelegateBuilder) : DynamicEndpointDataSource(logger), IEndpointForgeDataSource
 {
     public void AddEndpoint(AddEndpointRequest addEndpointRequest, bool apply = true)
     {
