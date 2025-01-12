@@ -30,16 +30,17 @@ internal static partial class LoggerExtensions
         this ILogger logger,
         [LogProperties(OmitReferenceName = true)] in Models.AddEndpointRequest addEndpointRequest);
 
-    [LoggerMessage(LogLevel.Information, "Endpoint Created: {Details}")]
-    private static partial void EndpointRoutingDetails(
+    [LoggerMessage(LogLevel.Information, "Endpoint Created: Route={Route}, Method={Method}")]
+    private static partial void LogEndpointRoutingDetails(
         this ILogger logger,
-        [LogProperties(OmitReferenceName = true)] in Models.EndpointRoutingDetails details);
+        string route,
+        string method);
 
     public static void LogAddEndpointRequestCompleted(this ILogger logger, Models.AddEndpointRequest addEndpointRequest)
     {
-        foreach (var details in addEndpointRequest.GetEndpointRoutingDetails())
+        foreach (var (route, method) in addEndpointRequest.GetEndpointRoutingDetails())
         {
-            logger.EndpointRoutingDetails(details); 
+            logger.LogEndpointRoutingDetails(route, method); 
         }
         logger.AddEndpointRequest(addEndpointRequest);
     }
