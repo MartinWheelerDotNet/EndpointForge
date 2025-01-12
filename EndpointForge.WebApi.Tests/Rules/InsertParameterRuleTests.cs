@@ -5,15 +5,6 @@ namespace EndpointForge.WebApi.Tests.Rules;
 
 public class InsertParameterRuleTests
 {
-        
-    [Fact]
-    public void When_NewInsertParameterRule_Expect_InstructionIsInsert()
-    {
-        var insertParameterRule = new InsertParameterRule();
-
-        insertParameterRule.Instruction.Should().Be("insert");
-    }
-    
     [Fact]
     public void When_NewInsertParameterRule_Expected_TypeIsParameter()
     {

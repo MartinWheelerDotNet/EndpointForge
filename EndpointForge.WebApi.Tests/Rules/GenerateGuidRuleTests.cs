@@ -8,13 +8,6 @@ namespace EndpointForge.WebApi.Tests.Rules;
 public class GenerateGuidRuleTests
 {
     private readonly Mock<IGuidGenerator> _stubGuidGenerator = new();
-    [Fact]
-    public void GenerateGuidRuleInstructionShouldBeGenerate()
-    {
-        var generateGuidRule = new GenerateGuidRule(_stubGuidGenerator.Object);
-        
-        generateGuidRule.Instruction.Should().Be("generate");
-    }
     
     [Fact]
     public void GenerateGuidRuleTypeShouldBeGuid()

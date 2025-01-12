@@ -4,9 +4,7 @@ namespace EndpointForge.WebApi.Rules;
 
 public class GenerateGuidRule(IGuidGenerator guidGenerator) : IEndpointForgeGeneratorRule
 {
-    private const string RuleInstruction = "generate";
     private const string RuleType = "guid";
-    public string Instruction => RuleInstruction;
     public string Type => RuleType;
     
 
