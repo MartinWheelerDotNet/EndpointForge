@@ -1,6 +1,6 @@
 namespace EndpointForge.WebApi.DataSources;
 
-public abstract class MutableEndpointDataSource : EndpointDataSource
+public abstract class DynamicEndpointDataSource : EndpointDataSource
 {
     private readonly Lock _endpointsLock = new();
     private readonly Lock _tokenLock = new();
@@ -9,9 +9,9 @@ public abstract class MutableEndpointDataSource : EndpointDataSource
     private CancellationTokenSource _cancellationTokenSource;
     private IChangeToken _changeToken;
 
-    private readonly ILogger<MutableEndpointDataSource> _logger;
+    private readonly ILogger<DynamicEndpointDataSource> _logger;
     
-    protected MutableEndpointDataSource(ILogger<MutableEndpointDataSource> logger)
+    protected DynamicEndpointDataSource(ILogger<DynamicEndpointDataSource> logger)
     {
         _logger = logger;
         _cancellationTokenSource = new CancellationTokenSource();
