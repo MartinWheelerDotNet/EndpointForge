@@ -16,9 +16,9 @@ public class ParameterProcessor : IParameterProcessor
 
         foreach (var (type, name, value) in parameters)
         {
-            if (ParameterType.IsHeader(type))
-                processedParameters.Add(name, value);
             if (ParameterType.IsStatic(type))
+                processedParameters.Add(name, value);
+            if (ParameterType.IsHeader(type))
                 if (context.Request.Headers.TryGetValue(name, out var header))
                     processedParameters.Add(value, header.ToString());
         }

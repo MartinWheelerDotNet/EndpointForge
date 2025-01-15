@@ -51,7 +51,7 @@ public class AddEndpointRequestValidatorTests
             var result = _endpointRequestValidator.TestValidate(model);
             
             result.ShouldHaveValidationErrorFor(x => x.Route)
-                .WithErrorMessage($"Endpoint request `route` is an invalid route: {route}.");
+                .WithErrorMessage($"Endpoint request `{nameof(AddEndpointRequest.Route)}` is an invalid route: {route}.");
             
         }
         
@@ -68,7 +68,7 @@ public class AddEndpointRequestValidatorTests
             var result = _endpointRequestValidator.TestValidate(model);
             
             result.ShouldHaveValidationErrorFor(x => x.Route)
-                .WithErrorMessage("Endpoint request `route` is empty or whitespace.");
+                .WithErrorMessage($"Endpoint request `{nameof(AddEndpointRequest.Route)}` is empty or whitespace.");
         }
 
         #endregion
@@ -103,7 +103,7 @@ public class AddEndpointRequestValidatorTests
             var result = _endpointRequestValidator.TestValidate(model);
 
             result.ShouldHaveValidationErrorFor(x => x.Methods)
-                  .WithErrorMessage("Endpoint request `methods` contains no entries.");
+                  .WithErrorMessage($"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries.");
         }
         #endregion
 
