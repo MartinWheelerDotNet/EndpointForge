@@ -7,9 +7,9 @@ using FluentAssertions;
 
 namespace EndpointForge.IntegrationTests.EndpointTests;
 
-public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
+public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClassFixture<EndpointForgeFixture>
 {
-    private const string WebApiName = "webapi";
+    private const string EndpointForgeName = "EndpointForge";
     private const string AddEndpointRoute = "/add-endpoint";
 
     #region Error Result Tests
@@ -21,7 +21,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             StatusCode = HttpStatusCode.BadRequest,
             Message = "Request body was of an unknown type, empty, or is missing required fields."
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
 
         var response = await httpClient.PostAsync(AddEndpointRoute, null);
         var responseBody = await response.Content.ReadFromJsonAsync<ErrorResponse>();
@@ -51,7 +51,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "was missing required properties including: 'Route'."
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -81,7 +81,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -110,7 +110,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -140,7 +140,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -170,7 +170,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "The requested endpoint has already been added for GET method"
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -198,7 +198,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "GET"
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -228,7 +228,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 StatusCode = 400
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -253,7 +253,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 StatusCode = 201
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -274,7 +274,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "GET"
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -299,7 +299,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "GET"
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -321,7 +321,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 "POST"
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -353,7 +353,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 StatusCode = 200
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -383,7 +383,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 Body = "String response body."
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -414,7 +414,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 Body = "String response body."
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
@@ -455,7 +455,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 }
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
 
         await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
@@ -492,7 +492,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
                 }
             }
         };
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         httpClient.DefaultRequestHeaders.Add("XCustom-Header", headerValue);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -521,7 +521,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             }
         };
         
-        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
 
         await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
