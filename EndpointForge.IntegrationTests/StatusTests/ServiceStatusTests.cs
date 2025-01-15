@@ -3,14 +3,14 @@ using FluentAssertions;
 
 namespace EndpointForge.IntegrationTests.StatusTests;
 
-public class ServiceStatusTests(WebApiFixture webApiFixture) : IClassFixture<WebApiFixture>
+public class ServiceStatusTests(EndpointForgeFixture endpointForgeFixture) : IClassFixture<EndpointForgeFixture>
 {
     [Theory]
-    [InlineData("webapi")]
+    [InlineData("EndpointForge")]
     public async Task ResourceHealthEndpointReturnsHealthyWhenResourceIsRunning(string resourceName)
     {
         const string endpointName = "/health";
-        using var httpClient = webApiFixture.Application.CreateHttpClient(resourceName);
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(resourceName);
         
         var response = await httpClient.GetAsync(endpointName);
         var body = await response.Content.ReadAsStringAsync();
