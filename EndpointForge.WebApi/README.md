@@ -1,5 +1,22 @@
 # EndpointForge.WebApi
 
+## Table of Contents
+
+<!-- TOC -->
+* [EndpointForge.WebApi](#endpointforgewebapi)
+  * [Table of Contents](#table-of-contents)
+  * [Description](#description)
+  * [Requirements](#requirements)
+  * [Configuration](#configuration)
+  * [Testing](#testing)
+  * [Building](#building)
+  * [Running](#running)
+  * [Endpoints](#endpoints)
+  * [Project References](#project-references)
+<!-- TOC -->
+
+## Description
+
 The purpose of this project is to provide a high performance REST based API to allow configuration, 
 creation, and management of EndpointForge dynamic endpoints, whilst keeping memory allocation as low as possible.
 
@@ -14,7 +31,8 @@ For more details about building and running as part of the .NET Aspire service, 
 - .NET 9.0.0 or above.
 - Development certificates present on the local machine for HTTPS connections.
 
-To install .NET 9 please see the [Install .NET Documentation](https://learn.microsoft.com/en-us/dotnet/core/install/) from Microsoft.
+To install .NET 9 please see the [.NET Install Documentation](https://learn.microsoft.com/en-us/dotnet/core/install/) 
+from Microsoft.
 
 To use HTTPS connections when running locally you will need to have local trusted development certificates present.
 These can be created and trusted by running the following command:
