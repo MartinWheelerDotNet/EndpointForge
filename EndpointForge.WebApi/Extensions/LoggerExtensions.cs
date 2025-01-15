@@ -19,7 +19,7 @@ internal static partial class LoggerExtensions
         int statusCode,
         HttpStatusCode statusDescription);
 
-    public static void LogErrorResponse(this ILogger logger, Models.ErrorResponse errorResponse)
+    public static void LogErrorResponse(this ILogger logger, ErrorResponse errorResponse)
     {
         logger.ErrorResponseInformation((int)errorResponse.StatusCode, errorResponse.StatusCode);
         logger.ErrorResponse(errorResponse);

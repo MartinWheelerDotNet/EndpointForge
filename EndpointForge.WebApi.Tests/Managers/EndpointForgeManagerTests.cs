@@ -66,7 +66,7 @@ public class EndpointForgeManagerTests
             () => exception.Message.Should().Be("Request contains invalid JSON body which cannot be processed."),
             () => exception.Errors
                 .Should()
-                .BeEquivalentTo("Endpoint request `route` is empty or whitespace."));
+                .BeEquivalentTo($"Endpoint request `{nameof(AddEndpointRequest.Route)}` is empty or whitespace."));
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class EndpointForgeManagerTests
             () => exception.Message.Should().Be("Request contains invalid JSON body which cannot be processed."),
             () => exception.Errors
                 .Should()
-                .BeEquivalentTo("Endpoint request `methods` contains no entries."));
+                .BeEquivalentTo($"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."));
     }
 
     [Fact]

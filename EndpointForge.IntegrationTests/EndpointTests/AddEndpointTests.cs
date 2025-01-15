@@ -107,7 +107,7 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request contains invalid JSON body which cannot be processed.",
             Errors = new[]
             {
-                "Endpoint request `methods` contains no entries."
+                $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -136,8 +136,8 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
             Message = "Request contains invalid JSON body which cannot be processed.",
             Errors = new[]
             {
-                "Endpoint request `route` is empty or whitespace.",
-                "Endpoint request `methods` contains no entries."
+                $"Endpoint request `{nameof(AddEndpointRequest.Route)}` is empty or whitespace.",
+                $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
         using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
@@ -502,6 +502,36 @@ public class AddEndpointTests(WebApiFixture webApiFixture) : IClassFixture<WebAp
         var responseBody = await response.Content.ReadAsStringAsync();
         
         responseBody.Should().Be("test-header-value");
+    }
+    #endregion
+    
+    #region Route Tests
+    [Fact]
+    public async Task When_ProvidingPathParameter_Expect_ResponseBodyToContainThatParameter()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-with/{path-parameter}",
+            Methods = new[] { "GET" },
+            Response = new
+            {
+                StatusCode = 200,
+                ContentType = "application/json",
+                Body = "{{insert:parameter:path-parameter}}"
+            }
+        };
+        
+        using var httpClient = webApiFixture.Application.CreateHttpClient(WebApiName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
+        var response = await httpClient.GetAsync("/test-endpoint-with/path-parameter-value");
+        var responseBody = await response.Content.ReadAsStringAsync();
+        
+        responseBody.Should().Be("path-parameter-value");
     }
     #endregion
 }
