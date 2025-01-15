@@ -41,6 +41,7 @@ for more information on this subject.
 ### Healthcheck Endpoint
 
 Route: `/health`
+
 Method: `GET`
 
 _When running in a .NET Aspire environment, this will be consumed by the `AppHost` service to provide service status in
@@ -67,6 +68,7 @@ Expected response: `200(OK) - "Healthy"`
 ### Alive Endpoint
 
 Route: `/alive`
+
 Method: `GET`
 
 The `Alive Endpoint` mirrors the `Healthcheck Endpoint` as `EndpointForge` relies upon no external 
@@ -99,6 +101,7 @@ These endpoints are used for the management and creation of dynamic endpoints in
 ### AddEndpoint Endpoint
 
 Route: `/add-endpoint`
+
 Method: `POST`
 
 The `AddEndpoint` endpoint is used to create new dynamic `EndpointForge` endpoints.
