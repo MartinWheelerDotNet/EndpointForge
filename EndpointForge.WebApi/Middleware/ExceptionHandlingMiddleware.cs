@@ -4,7 +4,7 @@ using EndpointForge.WebApi.Extensions;
 
 namespace EndpointForge.WebApi.Middleware;
 
-public class ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger,RequestDelegate next)
+public class ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger, RequestDelegate next)
 {
     public async Task Invoke(HttpContext context)
     {
