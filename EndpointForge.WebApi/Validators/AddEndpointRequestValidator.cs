@@ -9,13 +9,13 @@ public class AddEndpointRequestValidator : AbstractValidator<AddEndpointRequest>
     {
         RuleFor(x => x.Route)
             .NotEmpty()
-            .WithMessage("Endpoint request `route` is empty or whitespace.")
+            .WithMessage(details => $"Endpoint request `{nameof(details.Route)}` is empty or whitespace.")
             .Must(BeAValidRoute)
-            .WithMessage(details => $"Endpoint request `route` is an invalid route: {details.Route}.");
+            .WithMessage(details => $"Endpoint request `{nameof(details.Route)}` is an invalid route: {details.Route}.");
 
         RuleFor(x => x.Methods)
             .NotEmpty()
-            .WithMessage("Endpoint request `methods` contains no entries.");
+            .WithMessage(details => $"Endpoint request `{nameof(details.Methods)}` contains no entries.");
 
         RuleForEach(x => x.Parameters)
             .SetValidator(endpointForgeParameterDetailsValidator);

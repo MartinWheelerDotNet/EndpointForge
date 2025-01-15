@@ -1,4 +1,5 @@
 using EndpointForge.Abstractions;
+using EndpointForge.Abstractions.Constants;
 using EndpointForge.Models;
 
 namespace EndpointForge.WebApi.Processors;
@@ -8,18 +9,18 @@ public class ParameterProcessor : IParameterProcessor
     public Dictionary<string, string> Process(List<EndpointParameterDetails> parameters, HttpContext context)
     {
         var processedParameters = new Dictionary<string, string>();
-        foreach (var parameter in parameters)
+
+        foreach (var (key, value) in context.Request.RouteValues)
+            if (value is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
+                processedParameters.Add(key, stringValue);
+
+        foreach (var (type, name, value) in parameters)
         {
-            switch (parameter.Type)
-            {
-                case "static":
-                    processedParameters.Add(parameter.Name, parameter.Value);
-                    break;
-                case "header":
-                    if (context.Request.Headers.TryGetValue(parameter.Name, out var header))
-                        processedParameters.Add(parameter.Value, header.ToString());
-                    break;
-            }
+            if (ParameterType.IsHeader(type))
+                processedParameters.Add(name, value);
+            if (ParameterType.IsStatic(type))
+                if (context.Request.Headers.TryGetValue(name, out var header))
+                    processedParameters.Add(value, header.ToString());
         }
 
         return processedParameters;
