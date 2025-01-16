@@ -533,5 +533,34 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         
         responseBody.Should().Be("path-parameter-value");
     }
+    
+    [Fact]
+    public async Task When_ProvidingQueryParameters_Expect_ResponseBodyToContainThoseParameters()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-query-parameter-endpoint",
+            Methods = new[] { "GET" },
+            Response = new
+            {
+                StatusCode = 200,
+                ContentType = "application/json",
+                Body = "{{insert:parameter:test-id}} {{insert:parameter:test-name}}"
+            }
+        };
+        
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
+        var response = await httpClient.GetAsync(
+            "/test-query-parameter-endpoint?test-id=test-id-value&test-name=test-name-value");
+        var responseBody = await response.Content.ReadAsStringAsync();
+        
+        responseBody.Should().Be("test-id-value test-name-value");
+    }
     #endregion
 }
