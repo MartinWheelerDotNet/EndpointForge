@@ -1,10 +1,7 @@
 # EndpointForge.WebApi
 
-## Table of Contents
-
 <!-- TOC -->
 * [EndpointForge.WebApi](#endpointforgewebapi)
-  * [Table of Contents](#table-of-contents)
   * [Description](#description)
   * [Requirements](#requirements)
   * [Configuration](#configuration)
@@ -24,7 +21,7 @@ This project will also serve as the host server for all EndpointForge APIs creat
 
 This document covers building this project as a standalone service.
 For more details about building and running as part of the .NET Aspire service, please see the 
-[Aspire AppHost Documentation](../EndpointForge.AppHost/README.md#running) in the `EndpointForge.AppHost` project for more details.
+[Aspire AppHost Documentation](../EndpointForge.AppHost/README.md) in the `EndpointForge.AppHost` project for more details.
 
 ## Requirements
 

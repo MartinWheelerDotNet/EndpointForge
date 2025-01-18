@@ -16,10 +16,23 @@
   * [Service Endpoints](#service-endpoints)
     * [AddEndpoint Endpoint](#addendpoint-endpoint)
       * [Required Fields](#required-fields)
+      * [Required Headers](#required-headers)
         * [Example](#example-2)
-          * [AddEndpoint request](#addendpoint-request-)
-          * [Created EndpointForge Endpoint Request](#created-endpointforge-endpoint-request)
-      * [OpenApi Schema](#openapi-schema)
+      * [Optional fields](#optional-fields)
+      * [Constructing a Response Body](#constructing-a-response-body)
+      * [Parameters](#parameters)
+        * [Static Parameters](#static-parameters)
+        * [Route Values and Query Parameters](#route-values-and-query-parameters)
+      * [Placeholders](#placeholders)
+      * [Rules](#rules)
+        * [Generate Guid Rule](#generate-guid-rule)
+          * [Example](#example-3)
+        * [Insert Parameter Rule](#insert-parameter-rule)
+          * [Static Parameter Example](#static-parameter-example)
+          * [Header Parameter Example](#header-parameter-example)
+          * [Route Value Example](#route-value-example)
+          * [Query Parameter Example](#query-parameter-example)
+  * [OpenApi Schema](#openapi-schema)
 <!-- TOC -->
 
 ## Description
@@ -58,10 +71,15 @@ the Aspire dashboard._
 #### Example
 
 ```shell
-  curl http://localhost:5065/health
+  curl -i http://localhost:5065/health
 ```
 
-Expected response: `200(OK) - "Healthy"`
+```text
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+Healthy
+```
 
 <br />
 
@@ -88,10 +106,17 @@ the Aspire dashboard._
 #### Example
 
 ```shell
-  curl http://localhost:5065/alive
+  curl -i http://localhost:5065/alive
 ```
 
-Response: `200(OK) - "Healthy"`
+```text
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+Healthy
+```
+
+<br/>
 
 ## Service Endpoints
 
@@ -112,42 +137,418 @@ The request body should be of type `application/json` and provides the configura
 #### Required Fields
 
 * `"route"`: [ **_string_** ] - This should contain a valid route for the endpoint, route can start with or without a 
-  leading '/' and does not contain the hostname or port details.
+  leading `/` and does not contain the hostname or port details.
 
 * `"methods"`: [ **_string\[\]_** ] - This should contain an array of string values for the HTTP Methods to be used by 
   this endpoint.  The array must not be empty, or contain only whitespace or empty values.
 
+#### Required Headers
+
 * `Content-Type` Header: [ **_string_** ] - This should always be populated with the value `application\json`
-Submitting a POST request containing just a `route` and `methods` fields we result in a default `200 (OK)` response with
-an empty response body.
 
 * `Content-Length` Header: [ **_number_** ] - This should be populated with the length of the request body.  `Curl` 
-  (when using `--data`)and most other API Clients will auto-populate this field upon sending the request.
+  (when using `--data`), .NET `HttpClient` and most other API Clients will autopopulate this field upon sending the 
+  request.
+
+The response will be `201 (Created)` if the required fields and headers were set, and the `Location` header will be set
+to the path of the created resource.
+
 
 ##### Example
 
-###### AddEndpoint request 
+An example `Add Endpoint Request` containing just the `route` and `methods` fields.
+
+<H6>_Add Endpoint Request_</H6>
 
 ```shell
-  curl --location 'http://localhost:5065/add-endpoint' \
-       --header 'Content-Type: application/json' \
-       --data '{
-          "route": "/endpoint-forge-endpoint-1",
-          "methods": [ "GET" ]
-       }'
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+              "route": "/required-fields",
+              "methods": [ "GET" ]
+          }'
 ```
 
-Response: `200 (OK)`
+```text
+HTTP/1.1 201 Created
+Location: /required-fields
+```
 
-###### Created EndpointForge Endpoint Request
+<H6>_Created Endpoint Request_</H6>
 
 ```shell
-  curl --location 'http://localhost:5065/endpoint-forge-endpoint-1'
+  curl -i --location 'http://localhost:5065/required-fields'
 ```
 
-Response: `200 (OK)`
+```text
+HTTP/1.1 200 OK
+```
 
-#### OpenApi Schema
+
+#### Optional fields
+
+* `"response"` [ **_Object_**] - This should be used to configure the response required from the newly created endpoint.
+
+if a response is provided the following field may be set on the `response` object:
+
+* `"response.statusCode"` - This is the status code to be returned by the response, by default this value will be 
+  `200`. If provided this must be populated with a valid HTTP Status Code.
+
+* `"contentType"` - This is the content-type of the response.  This will populate the `Content-Type` header with 
+    the provided value.  If this is not provided, then the response `Content-Type` will be either 
+    `appplication/json` for a json body response, `text/plain` for a simple string or will remain unpopulated for an 
+    empty response body.
+
+* `"body"` - This is the body of the response. By default, this will be an empty request body if this is not 
+    provided. Constructing the response body is explored in detail in the 
+    [Constructing A Response Body](#constructing-a-response-body) section below.
+
+* `"parameters"` - This should be used to provide a list of parameter names and values to be used when constructing 
+  the response through the use of `Placeholders`.  `Parameters` and `Placeholders` are explored more in the 
+  [Parameters and Placeholders](#parameters) section below.
+
+<br />
+
+#### Constructing a Response Body
+
+When constructing a response body, a templated approach is used where you can add `rules` to request via 
+`placeholders`.  These allow the response body to insert data captured from the request, duplicate sections of the 
+provided body, and generate certain types of values such as GUIDs.
+
+**This is currently implemented with the minimum of rules and placeholders and this section will expand over time.**
+
+#### Parameters
+
+`Parameters` allow the providing of fixed values, or the capturing of values from the request body of the 
+request being made to created endpoint.
+
+To add `parameters` into the `Add Endpoint Request` then the optional property `parameters` is used.  This contains 
+an array of `Parameter` objects, which use the structure below:
+
+* `"type"`: This is the type of parameter being used and must be one of the following values:
+* * "static"
+* * "header"
+* `"name"`: This is the parameter name, and is used when in a `placeholder` to reference the provided `value`
+* `"value"`:  This is the value of the parameter and is used by a `placeholder` when inserting parameters.
+
+```json
+{
+  "parameters": [
+    {
+      "type": "string",
+      "name": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+##### Static Parameters
+
+`Parameters` with a type of `"static"` are used to store fixed values to be inserted into the response body.
+
+<H6>Available Rules</H6>
+
+* [Insert Parameter Rule](#insert-parameter-rule)
+
+`Parameters` with a type of `"header"` are used to capture header values from the request calling an
+`EndpointForge` endpoint created by an `Add Endpoint Request`.
+
+<H6>Available Rules</H6>
+
+* [Insert Parameter Rule](#insert-parameter-rule)
+
+##### Route Values and Query Parameters
+
+Route values and query parameters are automatically captured and available as static parameters.
+
+For example if a route of `/route-parameters/{identifier}?id=id-value&name=name-value` was specified in the `Add 
+Endpoint Request`, then static parameters of `identifier`, `id` and `name` will add with values captured from 
+the request route.
+
+<H6>Available Rules</H6>
+
+* [Insert Parameter Rule](#insert-parameter-rule)
+
+#### Placeholders
+
+`Placeholders` are used when constructing a response to tell the `EndpointForge` service to replace the value with 
+the results of the specified rule.  A `placeholder` is indicated by surrounding a rule instruction double curly 
+braces.
+
+#### Rules
+
+A `Rule` is a placeholder included in the response body.  A `Rule` placeholder is made up of segments and all use 
+the following pattern:
+
+```text
+{{instruction:type:value}}
+````
+
+* `instruction`: The action that will be completed by this rule. This must be one of the following values:
+* * `generate`: A rule which generates a value each time the placeholder is encountered in the provided 
+response body template.
+* * `insert`: A rule which inserts a captured parameter value.
+* `type`: Indicates the type of rule, for instance a `generate` rule might provide a `type` of `guid` for a guid 
+value to be generated
+* 'value': Indicates a value provided for to this rule, and can take a variety of uses and may be omitted by certain 
+rules.
+
+<br/>
+ 
+##### Generate Guid Rule
+
+Placeholder: `{{generate:guid}}`
+Details: This rule is used to generate a unique guid value each time the placeholder is encountered. 
+
+###### Example
+
+<H6>_Add Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "route": "/generate-guid-rule",
+            "methods": [ "GET" ],
+            "response": {
+              "statusCode": 200,
+              "contentType": "application/json",
+              "body": "First guid: {{generate:guid}}. Second guid: {{generate:guid}}."
+            }
+          }'
+```
+
+```text
+HTTP/1.1 201 Created
+Location: /generate-guid-rule
+```
+
+<H6>_Created Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/generate-guid-rule'
+```
+
+```text
+HTTP/1.1 200 OK
+Content-Length: 100
+Content-Type: application/json
+
+First guid: 8c2ed158-1c70-4892-81ab-45a846484576. Second guid: a36ed32d-bfc1-40a5-a619-72cb48fbc7cc.
+```
+
+As you can see, each time the generate guid rule placeholder was encountered, a different unique guid is generated to 
+replace that placeholder.
+
+<br/>
+
+##### Insert Parameter Rule
+
+Placeholder: `{{insert:parameter:<parameter name>}}`.
+Details:  This rule is used to insert a captured parameter in to the response body by replacing the provided 
+placeholder with the value of parameter named in the `<parameter name>` segment above.
+ 
+###### Static Parameter Example
+
+In the example below, a `"static"` parameter named, `parameter-name` is added the `Add Endpoint Request` with a
+value of`parameter-value`.  The response body contains a matching insert parameter rule.
+
+
+<H6>_Add Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "route": "/insert-parameter-rule-static",
+            "methods": [ "GET" ],
+            "response": {
+              "statusCode": 200,
+              "contentType": "application/json",
+              "body": "Static parameter value: {{insert:parameter:parameter-name}}"
+            },
+            "parameters": [
+              {
+                "type": "static",
+                "name": "parameter-name",
+                "value": "parameter-value"
+              }
+            ]
+          }'
+```
+
+```text
+HTTP/1.1 201 Created
+Location: /insert-parameter-rule-static
+```
+
+<H6>_Created Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/insert-parameter-rule-static'
+```
+
+```text
+HTTP/1.1 200 OK
+Content-Length: 39
+Content-Type: application/json
+
+Static parameter value: parameter-value
+```
+
+In the response above, you can see that the placeholder has been replaced with the value of the static parameter 
+`parameter-name` with was provided in the `Add Endpoint Request`.
+
+<br/>
+
+###### Header Parameter Example
+
+In the example below, a `"header"` parameter named `XCustom-Header` is added to the `Add Endpoint Request` with a
+value of `header-parameter`.  The response body contains a matching insert parameter rule.
+
+<H6>_Add Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "route": "/insert-parameter-rule-header",
+            "methods": [ "GET" ],
+            "response": {
+              "statusCode": 200,
+              "contentType": "application/json",
+              "body": "XCustom-Header value: {{insert:parameter:header-parameter}}"
+            },
+            "parameters": [
+              {
+                "type": "header",
+                "name": "XCustom-Header",
+                "value": "header-parameter"
+              }
+            ]
+          }'
+```
+
+```text
+HTTP/1.1 201 Created
+Location: /insert-parameter-rule-header
+```
+
+<H6>_Created Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/insert-parameter-rule-header' \
+          --header 'XCustom-Header: header-value'
+```
+
+```text
+HTTP/1.1 200 OK
+Content-Length: 34
+Content-Type: application/json
+
+XCustom-Header value: header-value
+```
+
+In the response above, you can see that the placeholder has been replaced with the value of the header `XCustom-Header` 
+provided in the `Curl` request.
+
+<br/>
+
+###### Route Value Example
+
+In the example below, a route is provided with a route value named `route-value-identifier`. When calling the endpoint 
+created by an `Add Endpoint Request` with a route value then this is captured as a parameter value.  The response body 
+value of the`Add Endpoint Request` contains a matching insert static parameter rule.
+
+<H6>_Add Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "route": "/insert-parameter-rule-route/{route-value-identifier}",
+            "methods": [ "GET" ],
+            "response": {
+              "statusCode": 200,
+              "contentType": "application/json",
+              "body": "Identifier value: {{insert:parameter:route-value-identifier}}"
+            }
+          }'
+```
+
+```text
+HTTP/1.1 201 Created
+Location: /insert-parameter-rule-route/{route-value-identifier}
+
+```
+
+<H6>_Created Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/insert-parameter-rule-route/identifier-value'
+```
+
+```text
+HTTP/1.1 200 OK
+Content-Length: 34
+Content-Type: application/json
+
+Identifier value: identifier-value
+```
+
+In the response above, you can see that the placeholder has been replaced with the route value which was provided 
+when calling the endpoint created by the `Add Endpoint Request`.
+
+<br/>
+
+###### Query Parameter Example
+
+In the example below, when calling the endpoint created by the `Add Endpoint Request` and providing query parameters 
+of `id=id-value` and `name=name-value` then these are captured for use by the rules.  The response body value of the 
+`Add Endpoint Request` contains a matching insert static parameter rule for each of the query parameters.
+
+<H6>_Add Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/add-endpoint' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "route": "/insert-parameter-rule-query",
+            "methods": [ "GET" ],
+            "response": {
+              "statusCode": 200,
+              "contentType": "application/json",
+              "body": "Id value: {{insert:parameter:id}}. Name value: {{insert:parameter:name}}"
+            }
+          }'
+```
+
+```text
+HTTP/1.1 201 Created
+Location: /insert-parameter-rule-query
+```
+
+<H6>_Created Endpoint Request_</H6>
+
+```shell
+  curl -i --location 'http://localhost:5065/insert-parameter-rule-query?id=id-value&name=name-value'
+```
+
+```text
+HTTP/1.1 200 OK
+Content-Length: 42
+Content-Type: application/json
+
+Id value: id-value. Name value name-value
+```
+
+In the response above, you can see that the placeholders has been replaced with corresponding query parameter value 
+which was provided when calling the endpoint created by the `Add Endpoint Request`.
+
+<br/>
+
+## OpenApi Schema
 <Details>
 <summary>Schema</summary>
 
