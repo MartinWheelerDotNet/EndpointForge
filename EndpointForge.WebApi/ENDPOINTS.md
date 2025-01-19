@@ -19,6 +19,7 @@
       * [Required Headers](#required-headers)
         * [Example](#example-2)
       * [Optional fields](#optional-fields)
+      * [Error Responses](#error-responses)
       * [Constructing a Response Body](#constructing-a-response-body)
       * [Parameters](#parameters)
         * [Static Parameters](#static-parameters)
@@ -208,6 +209,36 @@ if a response is provided the following field may be set on the `response` objec
   [Parameters and Placeholders](#parameters) section below.
 
 <br />
+
+#### Error Responses
+
+| Status Code                 | Body          | Error Status Code         | Description                                                                |
+|-----------------------------|---------------|---------------------------|----------------------------------------------------------------------------|
+| 400 (Bad Request)           | ErrorResponse | INVALID_REQUEST_BODY      | Request body was of an unknown type, empty, or is missing required fields. |
+| 409 (Conflict)              | ErrorResponse | ROUTE_CONFLICT            | Request contains one or more route conflicts.                              |
+| 422 (Unprocessable Entity)  | ErrorResponse | REQUEST_BODY_INVALID_JSON | Request contains invalid JSON body which cannot be processed.              |
+| 500 (Internal Server Error) | ErrorResponse | UNKNOWN_SERVER_ERROR      | An unhandled internal server error has occured.                            |
+
+If the request was not successful, an error response will be returned with the relevant Error Status Code and 
+message. It will also contain an array of Error strings, which will detail the reason for the failure.
+
+The `ErrorResponse` will be in the following format:
+
+```json
+{
+  "statusCode": "<ERROR_STATUS_CODE",
+  "message": "<ERROR_MESSAGE>",
+  "errors": [
+    "<AN_ERROR_REASON>",
+    "<ANOTHER_ERROR_REASON>"
+  ]
+}
+```
+
+The response headers will also contain a header with the key `X-Trace-Id`.  This can you used when searching 
+structured logs to identify this request.
+
+<br/>
 
 #### Constructing a Response Body
 
@@ -554,162 +585,169 @@ which was provided when calling the endpoint created by the `Add Endpoint Reques
 
 ```json
 {
-    "openapi": "3.0.1",
-    "info": {
-        "title": "EndpointForge.WebApi | v1",
-        "version": "1.0.0"
-    },
-    "servers": [
-        {
-            "url": "http://localhost:5065"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "EndpointForge.WebApi | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5065"
+    }
+  ],
+  "paths": {
+    "/add-endpoint": {
+      "post": {
+        "tags": [
+          "EndpointForge.WebApi"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddEndpointRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
         }
-    ],
-    "paths": {
-        "/add-endpoint": {
-            "post": {
-                "tags": [
-                    "EndpointForge.WebApi"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AddEndpointRequest"
-                            }
-                        }
-                    },
-                    "required": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddEndpointRequest": {
+        "required": [
+          "route",
+          "methods"
+        ],
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string"
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "statusCode": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "contentType": {
+                "type": "string",
+                "nullable": true
+              },
+              "body": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "required": [
+                "type",
+                "name",
+                "value"
+              ],
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
                 },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
                 }
+              }
             }
+          }
         }
-    },
-    "components": {
-        "schemas": {
-            "AddEndpointRequest": {
-                "required": [
-                    "route",
-                    "methods"
-                ],
-                "type": "object",
-                "properties": {
-                    "route": {
-                        "type": "string"
-                    },
-                    "methods": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "response": {
-                        "type": "object",
-                        "properties": {
-                            "statusCode": {
-                                "type": "integer",
-                                "format": "int32"
-                            },
-                            "contentType": {
-                                "type": "string",
-                                "nullable": true
-                            },
-                            "body": {
-                                "type": "string",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    "parameters": {
-                        "type": "array",
-                        "items": {
-                            "required": [
-                                "type",
-                                "name",
-                                "value"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
+      },
+      "ErrorResponse": {
+        "required": [
+          "errorStatusCode",
+          "message",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "errorStatusCode": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
             },
-            "ErrorResponse": {
-                "required": [
-                    "statusCode",
-                    "message",
-                    "errors"
-                ],
-                "type": "object",
-                "properties": {
-                    "statusCode": {
-                        "$ref": "#/components/schemas/HttpStatusCode"
-                    },
-                    "message": {
-                        "type": "string"
-                    },
-                    "errors": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "nullable": true
-                    }
-                }
-            },
-            "HttpStatusCode": {
-                "type": "integer"
-            }
+            "nullable": true
+          }
         }
-    },
-    "tags": [
-        {
-            "name": "EndpointForge.WebApi"
-        }
-    ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "EndpointForge.WebApi"
+    }
+  ]
 }
 ```
 
