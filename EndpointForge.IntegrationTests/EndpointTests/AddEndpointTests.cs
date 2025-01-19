@@ -18,9 +18,13 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
     {
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.BadRequest,
-            Message = "Request body was of an unknown type, empty, or is missing required fields."
+            ErrorStatusCode = "INVALID_REQUEST_BODY",
+            Message = "Request body was of an unknown type, empty, or is missing required fields.",
+            Errors = new [] { 
+                "Request body must not be empty."
+            }
         };
+        
         using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
 
         var response = await httpClient.PostAsync(AddEndpointRoute, null);
@@ -28,6 +32,7 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => response.Headers.Should().ContainKey("X-Trace-Id"),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
 
@@ -36,21 +41,20 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
     {
         var addEndpointRequest = new
         {
-            Methods = new[]
-            {
-                "GET"
-            }
+            Methods = new[] { "GET" }
         };
+        
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.BadRequest,
+            ErrorStatusCode = "INVALID_REQUEST_BODY",
             Message = "Request body was of an unknown type, empty, or is missing required fields.",
-            Errors = new []
-            {
+            Errors = new [] 
+            { 
                 "JSON deserialization for type 'EndpointForge.Models.AddEndpointRequest' " +
                 "was missing required properties including: 'Route'."
             }
         };
+        
         using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -60,6 +64,7 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => response.Headers.Should().ContainKey("X-Trace-Id"),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
 
@@ -70,17 +75,18 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         {
             Route = "/test-unprocessable-entity"
         };
+        
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.BadRequest,
+            ErrorStatusCode = "INVALID_REQUEST_BODY",
             Message = "Request body was of an unknown type, empty, or is missing required fields.",
-            Errors = new[]
-            {
+            Errors = new [] 
+            { 
                 "JSON deserialization for type 'EndpointForge.Models.AddEndpointRequest' " +
                 "was missing required properties including: 'Methods'."
-                
             }
         };
+        
         using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -90,6 +96,7 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.BadRequest),
+            () => response.Headers.Should().ContainKey("X-Trace-Id"),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
     
@@ -103,13 +110,14 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         };
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.UnprocessableEntity,
+            ErrorStatusCode = "REQUEST_BODY_INVALID_JSON",
             Message = "Request contains invalid JSON body which cannot be processed.",
-            Errors = new[]
-            {
+            Errors = new [] 
+            { 
                 $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
+        
         using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -119,6 +127,7 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
+            () => response.Headers.Should().ContainKey("X-Trace-Id"),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
 
@@ -132,14 +141,15 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         };
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.UnprocessableEntity,
+            ErrorStatusCode = "REQUEST_BODY_INVALID_JSON",
             Message = "Request contains invalid JSON body which cannot be processed.",
-            Errors = new[]
-            {
+            Errors = new [] 
+            { 
                 $"Endpoint request `{nameof(AddEndpointRequest.Route)}` is empty or whitespace.",
                 $"Endpoint request `{nameof(AddEndpointRequest.Methods)}` contains no entries."
             }
         };
+       
         using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
         var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
@@ -149,6 +159,7 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
+            () => response.Headers.Should().ContainKey("X-Trace-Id"),
             () => responseBody.Should().BeEquivalentTo(expectedResponseBody));
     }
     #endregion
@@ -164,7 +175,8 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         };
         var expectedResponseBody = new
         {
-            StatusCode = HttpStatusCode.Conflict,
+            ErrorStatusCode = "ROUTE_CONFLICT",
+            Message = "Request contains one or more route conflicts.",
             Errors = new[]
             {
                 "The requested endpoint has already been added for GET method"

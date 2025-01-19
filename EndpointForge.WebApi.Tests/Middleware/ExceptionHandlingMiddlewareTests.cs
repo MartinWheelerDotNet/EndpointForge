@@ -1,3 +1,4 @@
+using EndpointForge.Abstractions.Constants;
 using EndpointForge.Models;
 using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Middleware;
@@ -12,7 +13,7 @@ public class ExceptionHandlingMiddlewareTests
         NullLogger<ExceptionHandlingMiddleware>.Instance;
     
     [Fact]
-    public async Task When_EndpointForgeExceptionIsThrown_Expect_ResponseWithCorrectStatusCodeAndMessage()
+    public async Task When_EndpointForgeExceptionIsThrown_Expect_ResponseWithCorrectValues()
     {
         const string exceptionMessage = "test-exception-message";
         var errors = new[]
@@ -21,13 +22,18 @@ public class ExceptionHandlingMiddlewareTests
             "test-error-message-2"
         };
         
-        var endpointForgeException = new EndpointForgeException(HttpStatusCode.BadRequest, exceptionMessage, errors);
-        var expectedErrorResponse = new ErrorResponse(HttpStatusCode.BadRequest, exceptionMessage, errors);
+        var endpointForgeException = new EndpointForgeException(
+            HttpStatusCode.InternalServerError,
+            exceptionMessage, 
+            errors);
+
+        var expectedErrorResponse = new ErrorResponse(ErrorStatusCode.InternalServerError, exceptionMessage, errors);
 
         var middleware = new ExceptionHandlingMiddleware(StubLogger, _ => throw endpointForgeException);
         var context = new DefaultHttpContext
         {
-            Response = { Body = new MemoryStream() }
+            Response = { Body = new MemoryStream() },
+            TraceIdentifier = "test-trace-identifier"
         };
         
         await middleware.Invoke(context);
@@ -35,24 +41,25 @@ public class ExceptionHandlingMiddlewareTests
         var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(context.Response.Body, JsonOptions);
 
         Assert.Multiple(
-            () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.BadRequest),
+            () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
             () => responseBody.Should().BeEquivalentTo(expectedErrorResponse)
         );
     }
 
     [Fact]
-    public async Task When_UnhandledExceptionIsThrown_Expect_ResponseWithBadRequestAndGenericMessage()
+    public async Task When_UnhandledExceptionIsThrown_Expect_ResponseWithInternalServerError()
     {
-        const string errorMessage = "test-exception-message";
-        const string exceptionMessage = "Request body was of an unknown type, empty, or is missing required fields.";
-        var unhandledException = new Exception("test-exception-message");
-        var expectedErrorResponse = new ErrorResponse(HttpStatusCode.BadRequest, exceptionMessage, [errorMessage]);
+        const string exceptionMessage = "unhandled-exception-message";
+        
+        var unhandledException = new Exception(exceptionMessage);
+        var expectedErrorResponse = new ErrorResponse(ErrorStatusCode.InternalServerError, exceptionMessage, []);
 
         var middleware = new ExceptionHandlingMiddleware(StubLogger, _ => throw unhandledException);
         
         var context = new DefaultHttpContext
         {
-            Response = { Body = new MemoryStream() }
+            Response = { Body = new MemoryStream() },
+            TraceIdentifier = "test-trace-identifier"
         };
         
         await middleware.Invoke(context);
@@ -60,7 +67,7 @@ public class ExceptionHandlingMiddlewareTests
         var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(context.Response.Body, JsonOptions);
         
         Assert.Multiple(
-            () => context.Response.StatusCode.Should().Be((int)HttpStatusCode.BadRequest),
+            () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
             () => responseBody.Should().BeEquivalentTo(expectedErrorResponse));
     }
 

@@ -1,6 +1,7 @@
-using EndpointForge.Models;
+using System.Diagnostics;
 using EndpointForge.WebApi.Exceptions;
 using EndpointForge.WebApi.Extensions;
+using EndpointForge.WebApi.Factories;
 
 namespace EndpointForge.WebApi.Middleware;
 
@@ -12,24 +13,17 @@ public class ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> lo
         {
             await next(context);
         }
-        catch (EndpointForgeException exception)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(context, exception);
-        }
-        catch(Exception exception)
-        {
-            await HandleExceptionAsync(
-                context,
-                new BadRequestEndpointForgeException([exception.Message]));
-        }
-    }
+            context.Response.StatusCode = exception is EndpointForgeException endpointForgeException
+                ? (int) endpointForgeException.StatusCode
+                : (int) HttpStatusCode.InternalServerError;
+            context.Response.Headers.Append("X-Trace-Id", Activity.Current?.TraceId.ToString());
 
-    private Task HandleExceptionAsync(HttpContext context, EndpointForgeException exception)
-    {
-        context.Response.StatusCode = (int) exception.StatusCode;
-        var errorResponse = new ErrorResponse(exception.StatusCode, exception.Message, exception.Errors);
-
-        logger.LogErrorResponse(errorResponse);
-        return context.Response.WriteAsJsonAsync(errorResponse);
+            var errorResponse = ErrorResponseFactory.Create(exception);
+            
+            logger.LogErrorResponse(errorResponse);
+            await context.Response.WriteAsJsonAsync(errorResponse);
+        }
     }
 }

@@ -13,15 +13,12 @@ internal static partial class LoggerExtensions
         [LogProperties(OmitReferenceName = true)]
         in ErrorResponse errorResponse);
 
-    [LoggerMessage(LogLevel.Information, "An Error Response has been returned: [{statusCode}] {statusDescription}")]
-    private static partial void ErrorResponseInformation(
-        this ILogger logger,
-        int statusCode,
-        HttpStatusCode statusDescription);
+    [LoggerMessage(LogLevel.Information, "An Error Response has been returned: errorStatusCode={ErrorStatusCode}")]
+    private static partial void ErrorResponseInformation(this ILogger logger, string errorStatusCode);
 
     public static void LogErrorResponse(this ILogger logger, ErrorResponse errorResponse)
     {
-        logger.ErrorResponseInformation((int)errorResponse.StatusCode, errorResponse.StatusCode);
+        logger.ErrorResponseInformation(errorResponse.ErrorStatusCode);
         logger.ErrorResponse(errorResponse);
     }
 

@@ -1,3 +1,6 @@
 namespace EndpointForge.Models;
 
-public record ErrorResponse(HttpStatusCode StatusCode, string Message, IEnumerable<string>? Errors);
+public record ErrorResponse(
+    string ErrorStatusCode,
+    string Message, 
+    IEnumerable<string>? Errors);
