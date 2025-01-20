@@ -70,19 +70,25 @@ public class ResponseBodyParser(
 
         return instruction switch
         {
-            "generate" => TryInvokeGeneratorRule(streamWriter, type),
+            "generate" => TryInvokeGeneratorRule(streamWriter, type, parameterName, parameters),
             "insert" => TryInvokeInsertRule(streamWriter, type, parameterName, parameters),
             _ => false
         };
     }
 
-    private bool TryInvokeGeneratorRule(StreamWriter writer, ReadOnlySpan<char> type)
+    private bool TryInvokeGeneratorRule(
+        StreamWriter writer,
+        ReadOnlySpan<char> type,
+        ReadOnlySpan<char> parameterName,
+        IDictionary<string, string> parameters)
     {
         var rule = ruleFactory.GetRule<IEndpointForgeGeneratorRule>(type);
-        if (rule == null)
+
+        if (rule is null || !rule.TryInvoke(writer, out var generatedValue)) 
             return false;
-            
-        rule.Invoke(writer);
+        
+        if (parameterName is not "")
+            parameters.Add(parameterName.ToString(), generatedValue.ToString());
         return true;
     }
 
