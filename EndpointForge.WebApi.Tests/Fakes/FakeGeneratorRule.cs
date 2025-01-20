@@ -6,5 +6,11 @@ namespace EndpointForge.WebApi.Tests.Fakes;
 internal class FakeGeneratorRule(string type = "", string value = "") : IEndpointForgeGeneratorRule
 {
     public string Type => type;
-    public void Invoke(StreamWriter streamWriter) => streamWriter.Write(value);
+
+    public bool TryInvoke(StreamWriter streamWriter, out ReadOnlySpan<char> generatedValue)
+    {
+        generatedValue = "";
+        streamWriter.Write(value);
+        return true;
+    }
 }

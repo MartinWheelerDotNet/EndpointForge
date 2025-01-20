@@ -515,6 +515,32 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         
         responseBody.Should().Be("test-header-value");
     }
+    
+    [Fact]
+    public async Task When_CapturingGeneratorRuleWithInsertPlaceholder_Expect_EndpointResponseBodyToContainThatValue()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-endpoint-with-generator-capture",
+            Methods = new[] { "GET" },
+            Response = new
+            {
+                StatusCode = 201,
+                ContentType = "text/plain",
+                Body = "{{generate:guid:capture-parameter}}:{{insert:parameter:capture-parameter}}"
+            }
+        };
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
+        var response = await httpClient.GetAsync(addEndpointRequest.Route);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        var capturedValues = responseBody.Split(':');
+
+        capturedValues[0].Should().Be(capturedValues[1]);
+    }
     #endregion
     
     #region Route Tests

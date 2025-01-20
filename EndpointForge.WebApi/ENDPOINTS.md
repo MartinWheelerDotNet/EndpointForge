@@ -322,15 +322,16 @@ response body template.
 * * `insert`: A rule which inserts a captured parameter value.
 * `type`: Indicates the type of rule, for instance a `generate` rule might provide a `type` of `guid` for a guid 
 value to be generated
-* 'value': Indicates a value provided for to this rule, and can take a variety of uses and may be omitted by certain 
+* `value`: Indicates a value provided for to this rule, and can take a variety of uses and may be omitted by certain 
 rules.
 
 <br/>
  
 ##### Generate Guid Rule
 
-Placeholder: `{{generate:guid}}`
-Details: This rule is used to generate a unique guid value each time the placeholder is encountered. 
+Placeholder: `{{generate:guid}}` or `{{generate:guid:<parameter name>}}`
+Details: This rule is used to generate a unique guid value each time the placeholder is encountered. When a 
+parameter name is provided, the generated value with stored as parameter and available for use in other rules.
 
 ###### Example
 
@@ -345,7 +346,7 @@ Details: This rule is used to generate a unique guid value each time the placeho
             "response": {
               "statusCode": 200,
               "contentType": "application/json",
-              "body": "First guid: {{generate:guid}}. Second guid: {{generate:guid}}."
+              "body": "1: {{generate:guid}}. 2: {{generate:guid:guid-capture}}. 3: {{insert:parameter:guid-capture}}"
             }
           }'
 ```
@@ -366,11 +367,13 @@ HTTP/1.1 200 OK
 Content-Length: 100
 Content-Type: application/json
 
-First guid: 8c2ed158-1c70-4892-81ab-45a846484576. Second guid: a36ed32d-bfc1-40a5-a619-72cb48fbc7cc.
+1: 3c5a3f1c-a0db-43df-a974-b3e06bbfd755. 2: 9cedb34a-4c09-4dad-8491-cac91c17e0ae. 3: 9cedb34a-4c09-4dad-8491-cac91c17e0ae
+
 ```
 
 As you can see, each time the generate guid rule placeholder was encountered, a different unique guid is generated to 
-replace that placeholder.
+replace that placeholder. When the second guid included a parameter, the insert parameter rule inserted that 
+captured parameter, resulting in `2:` and `3:` being the same guid.
 
 <br/>
 
