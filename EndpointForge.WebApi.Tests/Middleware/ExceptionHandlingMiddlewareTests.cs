@@ -39,8 +39,7 @@ public class ExceptionHandlingMiddlewareTests
         context.Response.Body.Seek(0, SeekOrigin.Begin);
         var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(
             context.Response.Body, 
-            JsonSerializerDefaults.EndpointForge, 
-            TestContext.Current.CancellationToken);
+            JsonSerializerDefaults.EndpointForge);
         
         Assert.Multiple(
             () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
@@ -68,8 +67,7 @@ public class ExceptionHandlingMiddlewareTests
         context.Response.Body.Seek(0, SeekOrigin.Begin);
         var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(
             context.Response.Body, 
-            JsonSerializerDefaults.EndpointForge, 
-            TestContext.Current.CancellationToken);
+            JsonSerializerDefaults.EndpointForge);
         
         Assert.Multiple(
             () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
