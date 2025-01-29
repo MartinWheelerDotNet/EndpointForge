@@ -8,7 +8,6 @@ namespace EndpointForge.WebApi.Tests.Middleware;
 
 public class ExceptionHandlingMiddlewareTests
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
     private static readonly ILogger<ExceptionHandlingMiddleware> StubLogger = 
         NullLogger<ExceptionHandlingMiddleware>.Instance;
     
@@ -38,8 +37,11 @@ public class ExceptionHandlingMiddlewareTests
         
         await middleware.Invoke(context);
         context.Response.Body.Seek(0, SeekOrigin.Begin);
-        var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(context.Response.Body, JsonOptions);
-
+        var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(
+            context.Response.Body, 
+            JsonSerializerDefaults.EndpointForge, 
+            TestContext.Current.CancellationToken);
+        
         Assert.Multiple(
             () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
             () => responseBody.Should().BeEquivalentTo(expectedErrorResponse)
@@ -64,7 +66,10 @@ public class ExceptionHandlingMiddlewareTests
         
         await middleware.Invoke(context);
         context.Response.Body.Seek(0, SeekOrigin.Begin);
-        var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(context.Response.Body, JsonOptions);
+        var responseBody = await JsonSerializer.DeserializeAsync<ErrorResponse>(
+            context.Response.Body, 
+            JsonSerializerDefaults.EndpointForge, 
+            TestContext.Current.CancellationToken);
         
         Assert.Multiple(
             () => context.Response.StatusCode.Should().Be((int) HttpStatusCode.InternalServerError),
