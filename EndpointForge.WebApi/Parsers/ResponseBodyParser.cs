@@ -1,4 +1,7 @@
 using EndpointForge.Abstractions;
+using EndpointForge.WebApi.Constants;
+using EndpointForge.WebApi.Extensions;
+using EndpointForge.WebApi.Models;
 
 namespace EndpointForge.WebApi.Parsers;
 
@@ -7,71 +10,139 @@ public class ResponseBodyParser(
     IEndpointForgeRuleFactory ruleFactory) : IResponseBodyParser
 {
     public async Task ProcessResponseBody(
-        Stream stream, 
-        string responseBody, 
+        Stream stream,
+        string responseBody,
         Dictionary<string, string> parameters)
     {
         logger.LogInformation("Processing Response Body");
         var streamWriter = new StreamWriter(stream);
         var bodySpan = responseBody.AsSpan();
-        var lastWrittenIndex = 0;
+        var lastWrittenPosition = 0;
 
-        for (var readIndex = 0; readIndex < bodySpan.Length; readIndex++)
-        {
-            if (!IsStartOfPlaceholderBegin(readIndex, bodySpan))
-                continue;
-            
-            streamWriter.Write(bodySpan[lastWrittenIndex..readIndex]);
-            var startOfPlaceholderNameIndex = readIndex += 2;
+        // process the whole response body as segment
+        ProcessSegment(streamWriter, bodySpan, ref lastWrittenPosition, parameters);
 
-            if (IsStartOfPlaceholderEnd(readIndex, bodySpan))
-            {
-                lastWrittenIndex = readIndex += 2;
-                continue;
-            }
-
-            while (!IsStartOfPlaceholderEnd(readIndex, bodySpan))
-                readIndex++;
-
-            readIndex++;
-            var placeholderName = bodySpan[startOfPlaceholderNameIndex..readIndex];
-
-            if (!TryInvokeRule(streamWriter, placeholderName, parameters))
-            {
-                WritePlaceholder(streamWriter, placeholderName);
-            }
-
-            lastWrittenIndex = readIndex += 2;
-        }
-        
-        streamWriter.Write(bodySpan[lastWrittenIndex..]);
+        // flush the stream writer to write the buffered data and clear buffers
         await streamWriter.FlushAsync();
         logger.LogInformation("Processed Response Body");
     }
- 
+
+    private void ProcessSegment(
+        StreamWriter streamWriter,
+        ReadOnlySpan<char> segmentSpan,
+        ref int lastWritePosition,
+        Dictionary<string, string> parameters)
+    {
+        for (var currentReadPosition = 0; currentReadPosition < segmentSpan.Length; currentReadPosition++)
+        {
+            // if start of placeholder is not found loop until first placeholder is found
+            if (!segmentSpan.IsStartOfPlaceholderBegin(currentReadPosition))
+                continue;
+
+            // write data from the last write position of the span to the current read position
+            // and set the last write position to this index.
+            streamWriter.Write(segmentSpan[lastWritePosition..currentReadPosition]);
+            lastWritePosition = currentReadPosition;
+            
+            // skip placeholder markers and record position of placeholder content
+            currentReadPosition += 2;
+            
+            var placeholder = segmentSpan.ExtractPlaceholder(ref currentReadPosition);
+            
+            if (!PlaceholderDetails.TryParse(placeholder, out var placeholderDetails))
+            {
+                logger.LogInformation($"Placeholder: {placeholder}");
+
+                streamWriter.Write(segmentSpan[lastWritePosition..currentReadPosition]);
+                lastWritePosition = currentReadPosition;
+                continue;   
+            }
+            
+            // if the placeholder is for the start of a repeater
+            if (placeholderDetails is { Rule: RuleType.Repeat, Instruction: InstructionType.Start })
+            {
+                
+                // set the last Write Position and current read position to end of the placeholder end ('}}')
+                lastWritePosition = currentReadPosition;
+                
+                if (!int.TryParse(placeholderDetails.Values, out var repeaterAmount))
+                    throw new FormatException("Repeater value is not a number");
+
+                var repeaterSegmentSpan = ExtractRepeaterSegment(
+                    segmentSpan,
+                    placeholderDetails.Name,
+                    currentReadPosition,
+                    out var readOffset);
+                
+                for (var count = 0; count < repeaterAmount; count++)
+                {
+                    var segmentReadPosition = 0;
+                    ProcessSegment(streamWriter, repeaterSegmentSpan, ref segmentReadPosition, parameters);
+                }
+                
+                currentReadPosition = lastWritePosition = readOffset;
+                continue;
+            }
+            
+            logger.LogInformation("I'm not a repeater");
+            
+            if (!TryInvokeRule(streamWriter, placeholderDetails, parameters))
+                WritePlaceholder(streamWriter, placeholder);
+
+            lastWritePosition = currentReadPosition;
+        }
+        
+        streamWriter.Write(segmentSpan[lastWritePosition..]);
+    }
+
+    private ReadOnlySpan<char> ExtractRepeaterSegment(
+        ReadOnlySpan<char> segmentSpan,
+        ReadOnlySpan<char> repeaterName,
+        int segmentStartPosition,
+        out int readOffset)
+    {
+        for (readOffset = segmentStartPosition; readOffset < segmentSpan.Length; readOffset++)
+        {
+            if (!segmentSpan.IsStartOfPlaceholderBegin(readOffset))
+                continue;
+
+            var segmentEndPosition = readOffset;
+            var placeholderContentStartPosition = readOffset += 2;
+
+            if (segmentSpan.IsStartOfPlaceholderEnd(readOffset))
+                continue;
+            
+            while (!segmentSpan.IsStartOfPlaceholderEnd(readOffset))
+            {
+                if (readOffset + 1 == segmentSpan.Length)
+                    throw new FormatException("Placeholder end not found");
+                
+                readOffset++;
+            }
+
+            var placeholder = segmentSpan[placeholderContentStartPosition..readOffset];
+            if (!PlaceholderDetails.TryParse(placeholder, out var placeholderDetails))
+                continue;   
+            
+            readOffset += 2;
+
+            if (placeholderDetails.IsMatchingRepeatEnd(repeaterName))
+                return segmentSpan[segmentStartPosition..segmentEndPosition];
+        }
+        throw new ApplicationException("Could not find repeater end");
+    }
+
     private bool TryInvokeRule(
         StreamWriter streamWriter,
-        ReadOnlySpan<char> placeholderName,
+        PlaceholderDetails placeholderDetails,
         IDictionary<string, string> parameters)
     {
-        var splitPlaceholder = placeholderName.Split(':');
-        splitPlaceholder.MoveNext();
         
-        var instruction = placeholderName[splitPlaceholder.Current];
-        
-        if (!splitPlaceholder.MoveNext())
-            return false;
-        
-        var type = placeholderName[splitPlaceholder.Current];
-
-        var parameterName = splitPlaceholder.MoveNext()
-            ? placeholderName[splitPlaceholder.Current]
-            : null;
-
-        return instruction switch
+        logger.LogInformation($"invoke rule: {placeholderDetails.Instruction}");
+        return placeholderDetails.Rule switch
         {
-            "generate" => TryInvokeGeneratorRule(streamWriter, type, parameterName, parameters),
-            "insert" => TryInvokeInsertRule(streamWriter, type, parameterName, parameters),
+            RuleType.Generate => TryInvokeGeneratorRule(streamWriter, placeholderDetails.Instruction, placeholderDetails.Name, parameters),
+            RuleType.Insert => TryInvokeInsertRule(streamWriter,placeholderDetails.Instruction, placeholderDetails.Name, parameters),
             _ => false
         };
     }
@@ -84,9 +155,9 @@ public class ResponseBodyParser(
     {
         var rule = ruleFactory.GetRule<IEndpointForgeGeneratorRule>(type);
 
-        if (rule is null || !rule.TryInvoke(writer, out var generatedValue)) 
+        if (rule is null || !rule.TryInvoke(writer, out var generatedValue))
             return false;
-        
+
         if (parameterName is not "")
             parameters.Add(parameterName.ToString(), generatedValue.ToString());
         return true;
@@ -98,6 +169,7 @@ public class ResponseBodyParser(
         ReadOnlySpan<char> parameterName,
         IDictionary<string, string> parameters)
     {
+        logger.LogInformation("Start insert rule");
         ReadOnlySpan<char> parameterValue = "";
         foreach (var (key, value) in parameters)
         {
@@ -107,29 +179,29 @@ public class ResponseBodyParser(
 
         if (parameterValue.IsEmpty)
         {
-            streamWriter.Write("null");
-            return true;
+            
+            logger.LogInformation("No parameter found.");
+            return false;
         }
-        
+
+        logger.LogInformation("Parameter found");
         var rule = ruleFactory.GetRule<IEndpointForgeInsertRule>(type);
         if (rule == null)
             return false;
         
         
+        logger.LogInformation($"rule found: {rule}");
+
+
         rule.Invoke(streamWriter, parameterValue);
         return true;
     }
-    
-    private static void WritePlaceholder(StreamWriter writer, ReadOnlySpan<char> ruleName)
+
+    private void WritePlaceholder(StreamWriter writer, ReadOnlySpan<char> placeholder)
     {
+        logger.LogInformation($"Writing placeholder to stream: {placeholder}");
         writer.Write("{{");
-        writer.Write(ruleName);
+        writer.Write(placeholder);
         writer.Write("}}");
     }
-
-    private static bool IsStartOfPlaceholderEnd(int index, ReadOnlySpan<char> bodySpan)
-        => index + 1 < bodySpan.Length && bodySpan[index] == '}' || bodySpan[index + 1] == '}';
-
-    private static bool IsStartOfPlaceholderBegin(int index, ReadOnlySpan<char> bodySpan)
-        => index + 1 < bodySpan.Length && bodySpan[index] == '{' && bodySpan[index + 1] == '{';
 }

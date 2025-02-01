@@ -2,5 +2,17 @@ namespace EndpointForge.WebApi.Constants;
 
 public static class RuleType
 {
-    public const string Repeater = "repeater";
+    public const string Insert = "insert";
+    public const string Repeat = "repeat";
+    public const string Generate = "generate";
+
+    public static bool IsRule(ReadOnlySpan<char> ruleType)
+        => ruleType switch
+        {
+            Repeat => true,
+            Generate => true,
+            Insert => true,
+            _ => false
+        };
+
 }

@@ -1,11 +1,11 @@
 using EndpointForge.Abstractions;
+using EndpointForge.WebApi.Constants;
 
 namespace EndpointForge.WebApi.Rules;
 
 public class InsertParameterRule : IEndpointForgeInsertRule
 {
-    private const string RuleType = "parameter";
-    public string Type => RuleType;
+    public string Type => InstructionType.Parameter;
 
     public void Invoke(StreamWriter streamWriter, ReadOnlySpan<char> value) => streamWriter.Write(value);
 }
