@@ -1,4 +1,5 @@
 using EndpointForge.Abstractions;
+using EndpointForge.WebApi.Constants;
 using EndpointForge.WebApi.Parsers;
 using EndpointForge.WebApi.Tests.Fakes;
 using FluentAssertions;
@@ -59,10 +60,9 @@ public class ResponseBodyParserTests
     }
     
     [Fact]
-    public async Task When_ProcessResponseBodyWithEmptyPlaceholder_Expect_StreamRemovesThePlaceholder()
+    public async Task When_ProcessResponseBodyWithEmptyPlaceholder_Expect_StreamWriteTheEmptyPlaceholder()
     {
         const string body = "The placeholder instruction '{{}}' is empty.";
-        const string expectedBody = "The placeholder instruction '' is empty.";
         var responseBodyParser = new ResponseBodyParser(StubLogger, StubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
@@ -71,7 +71,7 @@ public class ResponseBodyParserTests
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
         
-        responseBody.Should().Be(expectedBody);
+        responseBody.Should().Be(body);
     }
     
     [Fact]
@@ -119,10 +119,10 @@ public class ResponseBodyParserTests
     [Fact]
     public async Task When_ProcessResponseBodyWithValidGeneratePlaceholder_Expect_StreamHasPlaceholderReplaced()
     {
-        const string body = "The value '{{generate:test}}' is from a rule.";
+        const string body = "The value '{{generate:guid}}' is from a rule.";
         const string expectedBody = "The value 'test-value' is from a rule.";
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
-            new FakeGeneratorRule("test", "test-value"));
+            new FakeGeneratorRule(InstructionType.Guid, "test-value"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
@@ -137,10 +137,10 @@ public class ResponseBodyParserTests
     [Fact]
     public async Task When_ProcessResponseBodyWithTwoValidGeneratePlaceholders_Expect_StreamHasPlaceholdersReplaced()
     {
-        const string body = "The value '{{generate:test}}' is from a rule, as `{{generate:test}}` is also.";
+        const string body = "The value '{{generate:guid}}' is from a rule, as `{{generate:guid}}` is also.";
         const string expectedBody = "The value 'test-value' is from a rule, as `test-value` is also.";
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
-            new FakeGeneratorRule("test", "test-value"));
+            new FakeGeneratorRule(InstructionType.Guid, "test-value"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
         var stream = new MemoryStream();
         
@@ -222,10 +222,9 @@ public class ResponseBodyParserTests
     }
     
     [Fact]
-    public async Task When_ProcessResponseBodyWithoutParameterAndWithInsertPlaceholder_Expect_StreamHasPlaceholdersReplacedWithNull()
+    public async Task When_ProcessResponseBodyWithoutParameterAndWithInsertPlaceholder_Expect_StreamHasStillHasPlaceholder()
     {
-        const string body = "The parameter is not found and so '{{insert:parameter:test-parameter-1}}' is written.";
-        const string expectedBody = "The parameter is not found and so 'null' is written.";
+        const string body = "Parameter not found so placeholder '{{insert:parameter:test-parameter-1}}' is written.";
         var stubEndpointForgeRuleFactory = new FakeEndpointForgeRuleFactory(
             new FakeInsertRule("parameter"));
         var responseBodyParser = new ResponseBodyParser(StubLogger, stubEndpointForgeRuleFactory);
@@ -240,7 +239,7 @@ public class ResponseBodyParserTests
         stream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(stream).ReadToEndAsync();
         
-        responseBody.Should().Be(expectedBody);
+        responseBody.Should().Be(body);
     }
     #endregion
 }

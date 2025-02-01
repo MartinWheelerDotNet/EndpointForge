@@ -1,11 +1,11 @@
 using EndpointForge.Abstractions;
+using EndpointForge.WebApi.Constants;
 
 namespace EndpointForge.WebApi.Rules;
 
 public class GenerateGuidRule(IGuidGenerator guidGenerator) : IEndpointForgeGeneratorRule
 {
-    private const string RuleType = "guid";
-    public string Type => RuleType;
+    public string Type => InstructionType.Guid;
     
 
     private const int GuidCharSize = 36;

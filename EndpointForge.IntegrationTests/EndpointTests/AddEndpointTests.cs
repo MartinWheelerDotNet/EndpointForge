@@ -601,4 +601,44 @@ public class AddEndpointTests(EndpointForgeFixture endpointForgeFixture) : IClas
         responseBody.Should().Be("test-id-value test-name-value");
     }
     #endregion
+
+    #region Repeater Tests
+
+    [Fact]
+    public async Task When_ProvidingRepeatRule_Expect_EnclosedSegmentIsRepeatedTheSpecifiedNumberOfTimes()
+    {
+        var addEndpointRequest = new
+        {
+            Route = "/test-repeat-count-endpoint",
+            Methods = new[] { "GET" },
+            Response = new
+            {
+                StatusCode = 200,
+                ContentType = "application/json",
+                Body = """
+                       Not repeated.
+                       {{repeat:start:repeat-name:3}}I'm being repeated. {{repeat:end:repeat-name}}
+                       Not repeated.
+                       """
+            }
+        };
+        
+        using var httpClient = endpointForgeFixture.Application.CreateHttpClient(EndpointForgeName);
+
+        await httpClient.PostAsJsonAsync(AddEndpointRoute, addEndpointRequest);
+        var jsonBody = JsonSerializer.Serialize(addEndpointRequest);
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        await httpClient.PostAsync(AddEndpointRoute, content);
+        var response = await httpClient.GetAsync("/test-repeat-count-endpoint");
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        responseBody.Should().Be("""
+                                 Not repeated.
+                                 I'm being repeated. I'm being repeated. I'm being repeated. 
+                                 Not repeated.
+                                 """);
+    }
+
+    #endregion
 }

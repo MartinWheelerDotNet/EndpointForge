@@ -1,9 +1,9 @@
 namespace EndpointForge.Abstractions.Constants;
 
 /// <summary>
-/// Contains types to verify the type of an EndpointForge parameter.
+/// Contains types of EndpointForge parameters
 /// </summary>
-public static class ParameterType
+public static partial class ParameterType
 {
     // ReSharper disable ConvertToConstant.Global
     // These are deliberately `static readonly` and not `const`.  This is so that all consuming assemblies
@@ -36,6 +36,21 @@ public static class ParameterType
     /// <see langword="true" /> if the type is Static; otherwise, <see langword="false" />.
     /// </returns>
     public static bool IsStatic(string type) => Equals(Static, type);
+
+    /// <summary>
+    /// Returns a value that indicates if the provided ReadOnlyCharSpan is a member of this string enum.
+    /// </summary>
+    /// <param name="value">The ReadOnlyCharSpan to be compared.</param>
+    /// <returns>
+    /// <see langword="true" />if the ReadOnlyCharSpan is a member of this string enum; otherwise, <see langword="false" />.
+    /// </returns>
+    public static bool IsMember(ReadOnlySpan<char> value)
+        => value switch
+        {
+            _ when value.SequenceEqual(Header) => true,
+            _ when value.SequenceEqual(Static) => true,
+            _ => false
+        };
     
     /// <summary>
     /// Returns a value that indicates if the EndpointForge parameter types are the same.
@@ -49,4 +64,6 @@ public static class ParameterType
     {
         return ReferenceEquals(typeA, typeB) || StringComparer.OrdinalIgnoreCase.Equals(typeA, typeB);
     }
+    
+    
 }
