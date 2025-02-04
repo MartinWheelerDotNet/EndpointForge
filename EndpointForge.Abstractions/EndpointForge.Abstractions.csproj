@@ -7,7 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\EndpointForge.Attributes\EndpointForge.Attributes.csproj" />
       <ProjectReference Include="..\EndpointForge.Models\EndpointForge.Models.csproj" />
+      <ProjectReference Include="..\EndpointForge.SourceGenerators\EndpointForge.SourceGenerators.csproj" />
     </ItemGroup>
     
     <ItemGroup>

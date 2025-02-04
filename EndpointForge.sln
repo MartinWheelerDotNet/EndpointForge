@@ -14,6 +14,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndpointForge.Models", "End
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndpointForge.Abstractions", "EndpointForge.Abstractions\EndpointForge.Abstractions.csproj", "{5AD83E4D-5893-416D-8062-C2F4DE455468}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndpointForge.SourceGenerators", "EndpointForge.SourceGenerators\EndpointForge.SourceGenerators.csproj", "{9E725A78-C17A-4AF9-A1A5-4E003156536C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndpointForge.SourceGenerators.Test", "EndpointForge.SourceGenerators.Test\EndpointForge.SourceGenerators.Test.csproj", "{882ABF4A-16EE-4DF9-9D07-BD2461278A01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndpointForge.Attributes", "EndpointForge.Attributes\EndpointForge.Attributes.csproj", "{7566A59E-2F1E-4CCE-8CC0-71038975463D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +54,17 @@ Global
 		{5AD83E4D-5893-416D-8062-C2F4DE455468}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AD83E4D-5893-416D-8062-C2F4DE455468}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AD83E4D-5893-416D-8062-C2F4DE455468}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E725A78-C17A-4AF9-A1A5-4E003156536C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E725A78-C17A-4AF9-A1A5-4E003156536C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E725A78-C17A-4AF9-A1A5-4E003156536C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E725A78-C17A-4AF9-A1A5-4E003156536C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{882ABF4A-16EE-4DF9-9D07-BD2461278A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{882ABF4A-16EE-4DF9-9D07-BD2461278A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{882ABF4A-16EE-4DF9-9D07-BD2461278A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{882ABF4A-16EE-4DF9-9D07-BD2461278A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7566A59E-2F1E-4CCE-8CC0-71038975463D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7566A59E-2F1E-4CCE-8CC0-71038975463D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7566A59E-2F1E-4CCE-8CC0-71038975463D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7566A59E-2F1E-4CCE-8CC0-71038975463D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

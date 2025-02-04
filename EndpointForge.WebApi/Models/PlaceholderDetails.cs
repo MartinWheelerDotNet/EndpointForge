@@ -29,7 +29,7 @@ public ref struct PlaceholderDetails
         if (!placeholderSplitEnumerator.MoveNext())
             return false;
         var rule = placeholderSpan[placeholderSplitEnumerator.Current];
-        if (!RuleType.IsRule(rule))
+        if (!RuleType.IsDefined(rule))
         {
             return false;
         }
@@ -37,11 +37,10 @@ public ref struct PlaceholderDetails
         if (!placeholderSplitEnumerator.MoveNext())
             return false;
         var instruction = placeholderSpan[placeholderSplitEnumerator.Current];
-        if (!InstructionType.IsInstruction(instruction))
+        if (!InstructionType.IsDefined(instruction))
         {
             return false;
         }
-        
         
         if (!placeholderSplitEnumerator.MoveNext())
         {

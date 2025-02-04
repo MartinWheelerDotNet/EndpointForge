@@ -1,3 +1,5 @@
+using System.Reflection.Metadata.Ecma335;
+
 namespace EndpointForge.Abstractions.Constants;
 
 public readonly struct ErrorStatusCode

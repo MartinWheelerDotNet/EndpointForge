@@ -7,7 +7,7 @@ public static class InstructionType
     public const string Guid = "guid";
     public const string Parameter = "parameter";
 
-    public static bool IsInstruction(ReadOnlySpan<char> instruction)
+    public static bool IsDefined(ReadOnlySpan<char> instruction)
         => instruction switch
         {
             Start or End => true,

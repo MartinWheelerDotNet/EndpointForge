@@ -1,3 +1,5 @@
+using EndpointForge.WebApi.Exceptions;
+
 namespace EndpointForge.WebApi.Extensions;
 
 public static class ReadOnlySpanExtensions
@@ -8,37 +10,30 @@ public static class ReadOnlySpanExtensions
            && segmentSpan[readPosition + 1] is '}';
 
     public static bool IsStartOfPlaceholderBegin(this ReadOnlySpan<char> segmentSpan, int readPosition)
-        => readPosition + 1 != segmentSpan.Length
+        => readPosition + 4 <= segmentSpan.Length
            && segmentSpan[readPosition] is '{'
-           && segmentSpan[readPosition + 1] is '{';
+           && segmentSpan[readPosition + 1] is '{'
+           && !segmentSpan.IsStartOfPlaceholderEnd(readPosition + 2);
 
     public static ReadOnlySpan<char> ExtractPlaceholder(this ReadOnlySpan<char> segmentSpan, ref int readPosition)
     {
+        var placeholderStartPosition = readPosition - 2;
         var placeholderContentStartPosition = readPosition;
-            
-        // if the end of the placeholder is immediately after the placeholder (`{{}}`) then this is not a
-        // valid placeholder and should be written.
-        if (segmentSpan.IsStartOfPlaceholderEnd(readPosition))
-        {
-            // set the current read position to after the end of the placeholder.
-            readPosition += 2;
-            return ReadOnlySpan<char>.Empty;
-        }
         
         while (!segmentSpan.IsStartOfPlaceholderEnd(readPosition))
         {
             readPosition++;
             if (readPosition == segmentSpan.Length - 1)
-                throw new Exception("Placeholder end marker not found");
+                throw new InvalidPlaceholderException(
+                    "Placeholder end marker not found",
+                    placeholderStartPosition);
             if (segmentSpan.IsStartOfPlaceholderBegin(readPosition))
-                throw new Exception("New placeholder start marker found before end of current placeholder");
+                throw new InvalidPlaceholderException(
+                    $"New placeholder start marker found at position [{readPosition}] before the end of current placeholder",
+                    placeholderStartPosition);
         }
-        
-        var placeholder = segmentSpan[placeholderContentStartPosition..readPosition];
 
-        //set current read position to the first character after the placeholder end marker
         readPosition += 2;
-
-        return placeholder;
+        return segmentSpan[placeholderContentStartPosition..(readPosition-2)];
     }
 }

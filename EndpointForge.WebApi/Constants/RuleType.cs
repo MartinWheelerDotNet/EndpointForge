@@ -6,7 +6,7 @@ public static class RuleType
     public const string Repeat = "repeat";
     public const string Generate = "generate";
 
-    public static bool IsRule(ReadOnlySpan<char> ruleType)
+    public static bool IsDefined(ReadOnlySpan<char> ruleType)
         => ruleType switch
         {
             Repeat => true,
